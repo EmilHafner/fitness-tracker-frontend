@@ -1,15 +1,17 @@
 "use client";
-import {useState} from "react";
+import React, {useState} from "react";
 import {useRouter} from "next/navigation";
-import {FormControl, FormLabel, FormErrorMessage, Button, Input} from "@chakra-ui/react";
+import {FormControl, FormLabel, FormErrorMessage, Button, Input, InputRightElement, InputGroup} from "@chakra-ui/react";
 import {useToast} from "@chakra-ui/react";
 import {registerUser} from "@/services/auth.service";
+import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 
 export default function Register() {
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [pwShown, setPwShown] = useState(false)
     const [passwordConfirm, setPasswordConfirm] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submittedBefore, setSubmittedBefore] = useState(false)
@@ -20,8 +22,20 @@ export default function Register() {
         event.preventDefault();
         setIsSubmitting(true);
         setSubmittedBefore(true);
+        if (password !== passwordConfirm) {
+            toast({
+                title: "Passwords do not match",
+                description: "Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                variant: "left-accent"
+            });
+            setIsSubmitting(false);
+            return;
+        }
 
-        registerUser(firstName, lastName, username, password).then((res) => {
+        registerUser(firstName, lastName, username.toLowerCase(), password).then(() => {
             toast({
                 title: "User created",
                 description: "User with " + username + " was created. " +
@@ -63,9 +77,10 @@ export default function Register() {
             <div className={"h-full"}>
                 <div className={"flex flex-col justify-center items-center bg-gray-200 h-full"}>
                     <form
-                        className={"flex flex-col w-96 gap-3 bg-gray-50 p-10 rounded-2xl outline outline-1 outline-blue-400"}
+                        className={"flex flex-col w-96 gap-3 bg-gray-50 p-10 rounded-2xl " +
+                            "outline outline-2 outline-blue-50 shadow-lg"}
                         onSubmit={handleSubmit}>
-                        <h1 className={"text-3xl font-bold"}>Register</h1>
+                        <h1 className={"text-2xl font-bold"}>Create a new Account</h1>
                         <FormControl isInvalid={!firstName && submittedBefore}>
                             <FormLabel>First Name</FormLabel>
                             <Input type={"text"} placeholder={"First Name"} value={firstName} required={true}
@@ -86,8 +101,16 @@ export default function Register() {
                         </FormControl>
                         <FormControl isInvalid={password.length < 8 && submittedBefore}>
                             <FormLabel>Password</FormLabel>
-                            <Input type={"password"} placeholder={"Password"} value={password} required={true}
-                                   minLength={8} onChange={(event) => setPassword(event.target.value)}/>
+                            <InputGroup>
+                                <Input type={pwShown ? "text":"password"} placeholder={"Password"} minLength={8} required={true}
+                                       value={password} onChange={(event) => setPassword(event.target.value)}/>
+                                <InputRightElement>
+                                    <Button variant={"ghost"} h={"1.5rem"} mr={2} onClick={() => setPwShown(!pwShown)}>
+                                        {pwShown ? (<ViewOffIcon/>) : (<ViewIcon/>)}
+                                    </Button>
+                                </InputRightElement>
+                            </InputGroup>
+
                             <FormErrorMessage>Password must be at least 8 characters long.</FormErrorMessage>
                         </FormControl>
                         <FormControl isInvalid={password != passwordConfirm && password.length >= 8}>
