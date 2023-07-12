@@ -5,7 +5,7 @@ export default function Document() {
     return (
         <Html lang="en">
             <Head/>
-            <body>
+            <body className={"mx-4"}>
             <Navbar/>
             <Main/>
             <NextScript/>
