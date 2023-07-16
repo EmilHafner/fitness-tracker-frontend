@@ -22,3 +22,7 @@ axiosI.interceptors.request.use(
 export async function getAllUsers(){
     return await axiosI.get("/admin/all-users");
 }
+
+export async function getAllTrainings(){
+    return await axiosI.get("/training/all-trainings");
+}
