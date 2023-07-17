@@ -29,10 +29,6 @@ export default function Trainings() {
       });
   }, [toast]);
 
-  if (session) {
-    return <div>Session: {session.user?.name}</div>;
-  }
-
   return (
     <div
       className={"flex flex-col-reverse items-center gap-4 pt-4 min-h-screen"}
