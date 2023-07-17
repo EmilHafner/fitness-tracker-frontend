@@ -2,14 +2,15 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ChakraProvider } from "@chakra-ui/react";
 import { SessionProvider } from "next-auth/react";
-import Head from "next/head";
+import Navbar from "@/components/Navbar";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider>
-      <SessionProvider session={pageProps.session}>
+    <SessionProvider session={pageProps.session}>
+      <ChakraProvider>
+        <Navbar />
         <Component {...pageProps} />
-      </SessionProvider>
-    </ChakraProvider>
+      </ChakraProvider>
+    </SessionProvider>
   );
 }

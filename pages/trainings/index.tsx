@@ -30,7 +30,7 @@ export default function Trainings() {
   }, [toast]);
 
   if (session) {
-    return <div>Session</div>;
+    return <div>Session: {session.user?.name}</div>;
   }
 
   return (

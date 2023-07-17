@@ -19,7 +19,12 @@ export default function Login() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    signIn("credentials", { username: username, password: password });
+    const result = await signIn("credentials", {
+      username: username,
+      password: password,
+      redirect: true,
+      callbackUrl: "/",
+    });
 
     return;
 

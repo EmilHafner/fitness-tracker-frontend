@@ -2,9 +2,11 @@ import { Box, Divider, Button } from "@chakra-ui/react";
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Navbar() {
   const [showLogin, setShowLogin] = useState(true);
+  const { data: session } = useSession();
 
   const itemList: ItemInterface[] = [
     { title: "Trainings", href: "/trainings" },
@@ -32,27 +34,24 @@ export default function Navbar() {
           ))}
         </div>
         <div className={"flex py-2 px-4"}>
-          {
-            showLogin ? (
-              // Login Button
-              <Link href={"/auth/login"}>
-                <Button
-                  className={
-                    "shadow-lg hover:bg-accent-muted transition-[1s] py-2 px-8 rounded-2xl bg-accent font-bold"
-                  }
-                >
-                  Login
-                </Button>
-              </Link>
-            ) : (
-              <></>
-            )
-
-            // Profile Button
-          }
+          {session?.user ? (
+            <div className="flex gap-4 items-center">
+              <p className="text-accent font-bold text-xl">
+                {session?.user?.username}
+              </p>
+              <Button
+                className={
+                  "shadow-lg hover:bg-accent-muted transition-[1s] py-2 px-8 rounded-2xl bg-red-500 font-bold"
+                }
+                onClick={() => signOut()}
+              >
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <LoginButton />
+          )}
         </div>
-
-        <Divider />
       </Box>
     </div>
   );
@@ -74,5 +73,20 @@ function NavbarItem(props: ItemInterface) {
     >
       {props.title}
     </Link>
+  );
+}
+
+function LoginButton() {
+  return (
+    <div>
+      <Button
+        className={
+          "shadow-lg hover:bg-accent-muted transition-[1s] py-2 px-8 rounded-2xl bg-accent font-bold"
+        }
+        onClick={() => signIn()}
+      >
+        Login
+      </Button>
+    </div>
   );
 }
