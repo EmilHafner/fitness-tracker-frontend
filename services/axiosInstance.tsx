@@ -1,4 +1,5 @@
 import axios from "axios";
+import {getSession} from "next-auth/react";
 
 export const axiosI = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -9,7 +10,9 @@ export const axiosI = axios.create({
 
 axiosI.interceptors.request.use(
     async (config) => {
-        const token = localStorage.getItem('fitnessAppToken');
+        //const token = localStorage.getItem('fitnessAppToken');
+        const session = await getSession();
+        const token = session?.jwt;
         console.log(token);
         if (token) {
             config.headers['Authorization'] = 'Bearer ' + token;
