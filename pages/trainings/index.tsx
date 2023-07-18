@@ -3,12 +3,14 @@ import { getAllTrainings } from "@/services/axiosInstance";
 import TrainingItem, {
   TrainingItemInterface,
 } from "@/components/training/TrainingItem";
-import { useToast } from "@chakra-ui/react";
+import { useToast, Skeleton, SkeletonText } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import AddTrainingComponent from "@/components/training/AddTrainingComponent";
+import { compareAsc, compareDesc } from "date-fns";
 
 export default function Trainings() {
   const [trainings, setTrainings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
   const { data: session } = useSession({
     required: true,
@@ -29,7 +31,14 @@ export default function Trainings() {
     if (!session) return;
     getAllTrainings()
       .then((res) => {
-        setTrainings(res.data);
+        let arr: Array<any> = res.data;
+        console.log(arr);
+        arr = arr.sort(
+          (a: any, b: any) => compareDesc(a.startDateTime, b.startDateTime) // ! This doesnt work, I dont know why!
+        );
+        console.log(arr);
+        setTrainings(arr); // ! Trainings are still unsorted
+        setIsLoading(false);
       })
       .catch((e) =>
         toast({
@@ -46,12 +55,11 @@ export default function Trainings() {
   if (!session) return null;
 
   return (
-    <div
-      className={"flex flex-col-reverse items-center gap-4 pt-4 min-h-screen"}
-    >
+    <div className={"flex flex-col items-center gap-4 pt-4 min-h-screen"}>
       {trainings.map((training: TrainingItemInterface, i) => (
         <TrainingItem key={i} {...training} />
       ))}
+
       <AddTrainingComponent />
     </div>
   );

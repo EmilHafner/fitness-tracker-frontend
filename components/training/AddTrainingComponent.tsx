@@ -13,25 +13,28 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 export default function AddTrainingComponent() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [customDate, setCustomDate] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
   const toast = useToast();
+  const router = useRouter();
   // TODO: Get all plans from backend
 
   function addTraining() {
     saveTraining(startDate)
-      .then(() =>
+      .then((t) => {
         toast({
           title: "Added a training",
           variant: "left-accent",
           status: "success",
           duration: 5000,
           isClosable: true,
-        })
-      )
+        });
+        router.push("/trainings/" + t.data.id);
+      })
       .catch((e) => {
         console.log(e);
         toast({
@@ -57,7 +60,7 @@ export default function AddTrainingComponent() {
           Start new Training
         </button>
       </div>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isCentered={true} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Start new Training</ModalHeader>

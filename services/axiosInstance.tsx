@@ -37,3 +37,7 @@ export async function saveTraining(startdate: Date) {
     startDateTime: startdate,
   });
 }
+
+export async function stopTraining(trainingId: number) {
+  return await axiosI.patch("/training/stop-training/" + trainingId);
+}
