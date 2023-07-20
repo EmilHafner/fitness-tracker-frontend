@@ -1,4 +1,4 @@
-import { Badge, Box, Flex } from "@chakra-ui/react";
+import { Badge, Box, Button, Flex } from "@chakra-ui/react";
 import { useBoolean } from "@chakra-ui/hooks";
 import { TimeIcon } from "@chakra-ui/icons";
 import {
@@ -17,8 +17,9 @@ export interface TrainingItemInterface {
   endDateTime: Date;
 }
 
-export default function TrainingItem(props: TrainingItemInterface) {
+export default function TrainingItem(props: TrainingItemInterface & {reloadItems: () => void}) {
   const router = useRouter();
+  const [loading, setLoading] = useBoolean();
 
   const start: Date = new Date(props.startDateTime);
   const end: Date | null = props.endDateTime
@@ -61,11 +62,17 @@ export default function TrainingItem(props: TrainingItemInterface) {
   };
 
   const onClick = () => {
+    console.log("Clicked on TrainingItem") // TODO: Remove this
     router.push("trainings/" + props.id);
   };
 
-  const stopThisTraining = () => {
-    stopTraining(props.id).then();
+  const stopThisTraining = (e: React.MouseEvent<any>) => {
+    setLoading.on();
+    e.stopPropagation();
+    stopTraining(props.id).then(
+      () => props.reloadItems()
+    );
+    setLoading.off();
   };
 
   return (
@@ -103,6 +110,7 @@ export default function TrainingItem(props: TrainingItemInterface) {
                 "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
               }
               onClick={stopThisTraining}
+              disabled={loading}
             >
               Stop this training
             </button>

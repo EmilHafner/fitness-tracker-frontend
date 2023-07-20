@@ -14,17 +14,23 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { format, set, setDate } from "date-fns";
 
-export default function AddTrainingComponent() {
+export default function AddTrainingComponent(props: {
+  reloadItems: () => void;
+}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [customDate, setCustomDate] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
   const toast = useToast();
   const router = useRouter();
   // TODO: Get all plans from backend
+  // TODO: Implement setting a custom startdate
 
   function addTraining() {
-    saveTraining(startDate)
+    // Format: 1995-12-17T03:24:00
+    saveTraining(new Date(startDate + "T" + startTime + ":00"))
       .then((t) => {
         toast({
           title: "Added a training",
@@ -33,7 +39,7 @@ export default function AddTrainingComponent() {
           duration: 5000,
           isClosable: true,
         });
-        router.push("/trainings/" + t.data.id);
+        props.reloadItems();
       })
       .catch((e) => {
         console.log(e);
@@ -48,6 +54,12 @@ export default function AddTrainingComponent() {
       .finally(() => onClose());
   }
 
+  const openModal = () => {
+    setStartDate(format(new Date(), "yyyy-MM-dd"));
+    setStartTime(format(new Date(), "HH:mm"));
+    onOpen();
+  }
+
   return (
     <div>
       <div className={"fixed bottom-20 left-1/2 -translate-x-1/2 font-medium"}>
@@ -55,7 +67,7 @@ export default function AddTrainingComponent() {
           className={
             "p-4 shadow-2xl outline outline-2 outline-accent-muted rounded-2xl bg-accent hover:bg-accent-muted"
           }
-          onClick={onOpen}
+          onClick={openModal}
         >
           Start new Training
         </button>
@@ -67,40 +79,30 @@ export default function AddTrainingComponent() {
           <ModalCloseButton />
           <ModalBody>
             <h2 className={"text-lg font-medium"}>Choose a plan</h2>
-            <Select placeholder="No plan" pb={4}>
-              <option value="Option 1">Option 1</option>
-            </Select>
+            <div className="pb-6 pt-2">
+              <Select placeholder="No plan">
+                <option value="Option 1">Option 1</option>
+              </Select>
+            </div>
+
             <div className="flex flex-col gap-2">
               <div className="flex flex-row justify-between items-center">
-                <h3 className={"text-md font-medium"}>
-                  {customDate ? "Enter Date and time" : "Starts now"}
-                </h3>
-                <button
-                  className="hover:bg-gray-200 bg-gray-100 text-primary-dark rounded-md px-4 py-2"
-                  onClick={() => setCustomDate(!customDate)}
-                >
-                  {customDate
-                    ? "Change startdate"
-                    : "Use current date and time"}
-                </button>
+                <h3 className={"text-md font-medium"}>Enter Date and time</h3>
               </div>
 
               <div className="flex flex-row gap-4">
-                {customDate ? (
-                  <div className="flex gap-2 justify-between w-full">
-                    <Input type="date" />
-                    <Input type="time" />
-                  </div>
-                ) : (
-                  <div className="flex gap-2 justify-between w-full">
-                    <div className="py-2 px-4 font-medium">
-                      {new Date().toLocaleDateString()}
-                    </div>
-                    <div className="py-2 px-4 font-medium">
-                      {new Date().toLocaleTimeString()}
-                    </div>
-                  </div>
-                )}
+                <div className="flex gap-2 justify-between w-full">
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                  <Input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           </ModalBody>

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { getSession } from "next-auth/react";
 
 export const axiosI = axios.create({
@@ -28,7 +28,8 @@ export async function getAllUsers() {
   return await axiosI.get("/admin/all-users");
 }
 
-export async function getAllTrainings() {
+export async function getAllTrainings(): 
+Promise<AxiosResponse<{id: number, userId: number, startDateTime: Date, endDateTime: Date}[], any>> {
   return await axiosI.get("/training/all-trainings");
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAllTrainings } from "@/services/axiosInstance";
 import TrainingItem, {
   TrainingItemInterface,
@@ -8,10 +8,18 @@ import { signIn, useSession } from "next-auth/react";
 import AddTrainingComponent from "@/components/training/AddTrainingComponent";
 import { compareAsc, compareDesc } from "date-fns";
 
+interface TrainingInterface {
+  id: number;
+  userId: number;
+  startDateTime: Date;
+  endDateTime: Date;
+}
+
 export default function Trainings() {
-  const [trainings, setTrainings] = useState([]);
+  const [trainings, setTrainings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
+  const [isTrainingRunning, setIsTrainingRunning] = useState(true);
   const { data: session } = useSession({
     required: true,
     onUnauthenticated() {
@@ -27,18 +35,20 @@ export default function Trainings() {
     },
   });
 
-  useEffect(() => {
-    if (!session) return;
+  const loadItems = useCallback((): void => {
     getAllTrainings()
       .then((res) => {
         let arr: Array<any> = res.data;
-        console.log(arr);
-        arr = arr.sort(
-          (a: any, b: any) => compareDesc(a.startDateTime, b.startDateTime) // ! This doesnt work, I dont know why!
+        arr = arr.sort((a: TrainingInterface, b: TrainingInterface) =>
+          compareDesc(new Date(a.startDateTime), new Date(b.startDateTime))
         );
-        console.log(arr);
-        setTrainings(arr); // ! Trainings are still unsorted
-        setIsLoading(false);
+        // Check if there is a training running
+        if (arr.filter((a) => !a.endDateTime).length > 0) {
+          setIsTrainingRunning(true);
+        } else {
+          setIsTrainingRunning(false);
+        }
+        setTrainings(arr);
       })
       .catch((e) =>
         toast({
@@ -50,17 +60,20 @@ export default function Trainings() {
           isClosable: true,
         })
       );
-  }, [toast, session]);
+  }, [toast])
 
-  if (!session) return null;
+  useEffect(() => {
+    if (!session) return;
+    loadItems();
+  }, [toast, session, loadItems]);
 
   return (
     <div className={"flex flex-col items-center gap-4 pt-4 min-h-screen"}>
       {trainings.map((training: TrainingItemInterface, i) => (
-        <TrainingItem key={i} {...training} />
+        <TrainingItem key={i} {...training} reloadItems={loadItems} />
       ))}
 
-      <AddTrainingComponent />
+      {!isTrainingRunning && <AddTrainingComponent reloadItems={loadItems} />}
     </div>
   );
 }
