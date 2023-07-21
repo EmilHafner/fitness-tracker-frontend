@@ -13,18 +13,15 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useRouter } from "next/router";
-import { format, set, setDate } from "date-fns";
+import { format } from "date-fns";
 
 export default function AddTrainingComponent(props: {
   reloadItems: () => void;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [customDate, setCustomDate] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const toast = useToast();
-  const router = useRouter();
   // TODO: Get all plans from backend
   // TODO: Implement setting a custom startdate
 
@@ -58,7 +55,7 @@ export default function AddTrainingComponent(props: {
     setStartDate(format(new Date(), "yyyy-MM-dd"));
     setStartTime(format(new Date(), "HH:mm"));
     onOpen();
-  }
+  };
 
   return (
     <div>

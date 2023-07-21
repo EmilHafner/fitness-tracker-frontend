@@ -1,10 +1,8 @@
-import { Badge, Box, Button, Flex } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { useBoolean } from "@chakra-ui/hooks";
-import { TimeIcon } from "@chakra-ui/icons";
 import {
   format,
   differenceInDays,
-  formatDistanceStrict,
   intervalToDuration,
   formatDuration,
 } from "date-fns";
@@ -17,7 +15,9 @@ export interface TrainingItemInterface {
   endDateTime: Date;
 }
 
-export default function TrainingItem(props: TrainingItemInterface & {reloadItems: () => void}) {
+export default function TrainingItem(
+  props: TrainingItemInterface & { reloadItems: () => void }
+) {
   const router = useRouter();
   const [loading, setLoading] = useBoolean();
 
@@ -62,16 +62,14 @@ export default function TrainingItem(props: TrainingItemInterface & {reloadItems
   };
 
   const onClick = () => {
-    console.log("Clicked on TrainingItem") // TODO: Remove this
+    console.log("Clicked on TrainingItem"); // TODO: Remove this
     router.push("trainings/" + props.id);
   };
 
   const stopThisTraining = (e: React.MouseEvent<any>) => {
     setLoading.on();
     e.stopPropagation();
-    stopTraining(props.id).then(
-      () => props.reloadItems()
-    );
+    stopTraining(props.id).then(() => props.reloadItems());
     setLoading.off();
   };
 
@@ -105,15 +103,18 @@ export default function TrainingItem(props: TrainingItemInterface & {reloadItems
         <div className={"flex flex-col justify-around"}>
           {active ? (
             // ! This button doesnt work yet
-            <button
+            <Button
               className={
+                "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
+              }
+              css={
                 "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
               }
               onClick={stopThisTraining}
               disabled={loading}
             >
               Stop this training
-            </button>
+            </Button>
           ) : (
             <></>
           )}
