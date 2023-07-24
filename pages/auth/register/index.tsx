@@ -5,6 +5,7 @@ import {FormControl, FormLabel, FormErrorMessage, Button, Input, InputRightEleme
 import {useToast} from "@chakra-ui/react";
 import {registerUser} from "@/services/auth.service";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
+import Link from "next/link";
 
 export default function Register() {
     const [firstName, setFirstName] = useState('')
@@ -35,7 +36,7 @@ export default function Register() {
             return;
         }
 
-        registerUser(firstName, lastName, username.toLowerCase(), password).then(() => {
+        registerUser(firstName, lastName, username, password).then(() => {
             toast({
                 title: "User created",
                 description: "User with " + username + " was created. " +
@@ -123,8 +124,8 @@ export default function Register() {
                                 isLoading={isSubmitting}>Register</Button>
                     </form>
                     <span className={"py-1"}>Already have an account?</span>
-                    <Button type={"button"} colorScheme={"green"} variant={"outline"}><a
-                        href="/auth/login">Login</a></Button>
+                    <Button type={"button"} colorScheme={"green"} variant={"outline"}><Link
+                        href="/auth/login">Login</Link></Button>
                 </div>
             </div>
         </>
