@@ -23,6 +23,16 @@ export default function Login() {
         if (router.query.callbackUrl) {
             setCallbackUrl(router.query.callbackUrl as string)
         }
+        if (router.query.error) {
+            toast({
+                title: "Cannot access this page",
+                description: "You have to login first.",
+                status: "error",
+                variant: "left-accent",
+                duration: 2000,
+                isClosable: true,
+            });
+        }
     }, [router.query.callbackUrl, session?.status, router, toast]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
