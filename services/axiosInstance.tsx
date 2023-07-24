@@ -13,7 +13,6 @@ axiosI.interceptors.request.use(
     //const token = localStorage.getItem('fitnessAppToken');
     const session = await getSession();
     const token = session?.jwt;
-    console.log(token);
     if (token) {
       config.headers["Authorization"] = "Bearer " + token;
     }
