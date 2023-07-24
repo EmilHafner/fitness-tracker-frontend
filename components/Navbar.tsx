@@ -9,6 +9,7 @@ export default function Navbar() {
   const itemList: ItemInterface[] = [
     { title: "Trainings", href: "/trainings" },
     { title: "Plans", href: "/plans" },
+    { title: "Exercises", href: "/exercises" },
   ];
 
   return (
