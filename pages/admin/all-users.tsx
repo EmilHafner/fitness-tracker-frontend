@@ -12,7 +12,6 @@ export default function AllUsers() {
     useEffect(() => {
             getAllUsers().then(res => {
                 setUserList(res.data)
-                console.log(res.data)
             }).catch(
                 err => {
                     toast({
