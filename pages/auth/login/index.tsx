@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {FormControl, FormLabel, Alert, AlertIcon} from "@chakra-ui/react";
 import {Input, Button, InputGroup, InputRightElement} from "@chakra-ui/react";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
-import {loginUser} from "@/services/auth.service";
 import {useToast} from "@chakra-ui/react";
 import Link from "next/link";
 import Router, {useRouter} from "next/router";
@@ -88,7 +87,8 @@ export default function Login() {
                     {session?.status === 'authenticated' && !isSubmitting ? (
                         <Alert className={"rounded"} status={"warning"}>
                             <AlertIcon/>
-                            You are already logged in.
+                            <span className="font-medium">{session?.data?.user?.username}</span>&nbsp;
+                            <span>is currently logged in.</span>
                         </Alert>
                     ) : (<></>) }
                     <h1 className={"text-2xl font-bold pb-3"}>Log in to your account</h1>
