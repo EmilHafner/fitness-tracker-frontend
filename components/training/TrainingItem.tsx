@@ -74,52 +74,52 @@ export default function TrainingItem(
   };
 
   return (
-    <div
-      onClick={onClick}
-      className={
-        "flex justify-center w-5/6 border-4 border-accent-muted px-16 py-4 rounded-xl hover:cursor-pointer hover:shadow-lg hover:border-accent"
-      }
-    >
-      <div className={"flex justify-between w-full"}>
-        <div className="flex">
-          <div
-            className={
-              "relative -left-4 w-2 rounded-md " +
-              (active ? "bg-primary" : "bg-accent")
-            }
-          ></div>
-          <div className={"flex flex-col"}>
-            <div className={"flex items-center pb-1"}>
-              <h2 className={"font-bold pr-10"}>{getStartDateString()}</h2>
-              <h2>{getDurationString()}</h2>
+      <div
+        onClick={onClick}
+        className={
+          "flex justify-center w-5/6 border-4 border-accent-muted px-16 py-4 rounded-xl hover:cursor-pointer hover:shadow-lg hover:border-accent"
+        }
+      >
+        <div className={"flex justify-between w-full"}>
+          <div className="flex">
+            <div
+              className={
+                "relative -left-4 w-2 rounded-md " +
+                (active ? "bg-primary" : "bg-accent")
+              }
+            ></div>
+            <div className={"flex flex-col"}>
+              <div className={"flex items-center pb-1"}>
+                <h2 className={"font-bold pr-10"}>{getStartDateString()}</h2>
+                <h2>{getDurationString()}</h2>
+              </div>
+              <div className="pb-6">
+                <div>{getTimeFromTo()}</div>
+              </div>
+              <div>Icons for records</div>
             </div>
-            <div className="pb-6">
-              <div>{getTimeFromTo()}</div>
-            </div>
-            <div>Icons for records</div>
+          </div>
+
+          <div className={"flex flex-col justify-around"}>
+            {active ? (
+              // ! This button doesnt work yet
+              <Button
+                className={
+                  "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
+                }
+                css={
+                  "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
+                }
+                onClick={stopThisTraining}
+                disabled={loading}
+              >
+                Stop this training
+              </Button>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
-
-        <div className={"flex flex-col justify-around"}>
-          {active ? (
-            // ! This button doesnt work yet
-            <Button
-              className={
-                "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
-              }
-              css={
-                "py-2 px-4 rounded bg-abort hover:bg-abort-muted font-medium"
-              }
-              onClick={stopThisTraining}
-              disabled={loading}
-            >
-              Stop this training
-            </Button>
-          ) : (
-            <></>
-          )}
-        </div>
       </div>
-    </div>
   );
 }
