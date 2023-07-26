@@ -2,9 +2,21 @@ import { Box } from "@chakra-ui/react";
 import Link from "next/link";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const [authPage, setAuthPage] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (router.asPath.startsWith("/auth")) {
+      setAuthPage(true);
+    } else {
+      setAuthPage(false);
+    }
+  }, [router.asPath])
 
   const itemList: ItemInterface[] = [
     { title: "Trainings", href: "/trainings" },
@@ -33,7 +45,7 @@ export default function Navbar() {
           ))}
         </div>
         <div className={"flex py-2 px-4"}>
-          {session?.user ? (
+          {!authPage && (session?.user ? (
             <div className="flex gap-4 items-center">
               <p className="text-accent font-bold text-xl">
                 {session?.user?.username}
@@ -56,7 +68,7 @@ export default function Navbar() {
               >
                   Login
               </div>
-          )}
+          ))}
         </div>
       </Box>
     </div>
