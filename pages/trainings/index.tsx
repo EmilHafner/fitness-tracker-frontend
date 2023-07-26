@@ -37,6 +37,7 @@ export default function Trainings() {
   });
 
   const loadItems = useCallback((): void => {
+    setIsLoading(true);
     getAllTrainings()
       .then((res) => {
         let arr: Array<any> = res.data;
@@ -60,13 +61,26 @@ export default function Trainings() {
           duration: 4000,
           isClosable: true,
         })
-      );
-  }, [toast])
+      )
+      .finally(() => setIsLoading(false));
+  }, [toast]);
 
   useEffect(() => {
     if (!session) return;
     loadItems();
   }, [toast, session, loadItems]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-4 pt-4 min-h-screen">
+        {[...Array(5)].map((key) => (
+          <div key={key} className="rounded-xl h-32 w-5/6">
+            <Skeleton height="100%" width="100%" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className={"flex flex-col items-center gap-4 pt-4 min-h-screen"}>
@@ -74,11 +88,19 @@ export default function Trainings() {
         <TrainingItem key={i} {...training} reloadItems={loadItems} />
       ))}
 
+      {!trainings.length && (
+        <div className={"flex flex-col items-center gap-4 pt-4 min-h-screen"}>
+          <p className={"text-2xl font-bold"}>No trainings found</p>
+          <p className={"text-xl"}>
+            Start a new training by clicking the button below
+          </p>
+        </div>
+      )}
+
       {!isTrainingRunning && <AddTrainingComponent reloadItems={loadItems} />}
     </div>
   );
 }
-
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
@@ -95,4 +117,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {},
   };
-}
+};
