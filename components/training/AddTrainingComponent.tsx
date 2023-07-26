@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { format } from "date-fns";
+import Button from "../basics/Button";
 
 export default function AddTrainingComponent(props: {
   reloadItems: () => void;
@@ -60,14 +61,15 @@ export default function AddTrainingComponent(props: {
   return (
     <div>
       <div className={"fixed bottom-20 left-1/2 -translate-x-1/2 font-medium"}>
-        <button
+        <Button
+        variant="big"
           className={
-            "p-4 shadow-2xl outline outline-2 outline-accent-muted rounded-2xl bg-accent hover:bg-accent-muted"
+            ""
           }
           onClick={openModal}
         >
           Start new Training
-        </button>
+        </Button>
       </div>
       <Modal isCentered={true} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -109,7 +111,7 @@ export default function AddTrainingComponent(props: {
               className="py-2 px-4 mr-4 rounded-lg font-medium bg-white hover:bg-gray-100"
               onClick={onClose}
             >
-              Abbrechen
+              Cancel
             </button>
             <button
               className="py-2 px-4 rounded-lg font-medium bg-accent hover:bg-accent-muted"
