@@ -4,92 +4,144 @@ import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Button from "./basics/Button";
+import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { twMerge } from "tailwind-merge";
+import { Session } from "next-auth";
 
 export default function Navbar() {
-  const { data: session } = useSession();
-  const [authPage, setAuthPage] = useState(false);
-  const router = useRouter();
+    const { data: session } = useSession();
+    const [authPage, setAuthPage] = useState(false);
+    const router = useRouter();
+    const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (router.asPath.startsWith("/auth")) {
-      setAuthPage(true);
-    } else {
-      setAuthPage(false);
-    }
-  }, [router.asPath])
-
-  const itemList: ItemInterface[] = [
-    { title: "Trainings", href: "/trainings" },
-    { title: "Plans", href: "/plans" },
-    { title: "Exercises", href: "/exercises" },
-  ];
-
-  return (
-    <div className={""}>
-      <Box
-        className={
-          "flex flex-wrap items-center justify-between shadow-xl bg-primary w-full py-4 px-16"
+    useEffect(() => {
+        setMenuOpen(false);
+        if (router.asPath.startsWith("/auth")) {
+            setAuthPage(true);
+        } else {
+            setAuthPage(false);
         }
-      >
-        <Link href={"/"} className={"w-32"}>
-          <Image
-            src={"/logo/logo-no-background.svg"}
-            width={120}
-            height={30}
-            alt={"Logo"}
-          />
-        </Link>
-        <div className={"flex gap-8 py-2 px-4"}>
-          {itemList.map((item, i) => (
-            <NavbarItem key={i} {...item} />
-          ))}
-        </div>
-        <div className={"flex py-2 px-4"}>
-          {!authPage && (session?.user ? (
-            <div className="flex gap-4 items-center">
-              <p className="text-accent font-bold text-xl">
-                {session?.user?.username}
-              </p>
-              <div
+    }, [router.asPath]);
+
+    const itemList: ItemInterface[] = [
+        { title: "Trainings", href: "/trainings" },
+        { title: "Plans", href: "/plans" },
+        { title: "Exercises", href: "/exercises" },
+    ];
+
+    return (
+        <div className={""}>
+            <Box
                 className={
-                  "shadow-lg hover:bg-accent-muted hover:cursor-pointer transition-[1s] py-2 px-8 rounded-2xl bg-accent font-bold"
+                    "flex w-full flex-wrap items-center justify-between bg-primary px-12 py-4 shadow-xl md:px-16"
                 }
-                onClick={() => signOut()}
-              >
-                Logout
-              </div>
-            </div>
-          ) : (
-              <div
-                  className={
-                      "shadow-lg hover:bg-accent-muted hover:cursor-pointer transition-[1s] py-2 px-8 rounded-2xl bg-accent font-bold"
-                  }
-                  onClick={() => signIn()}
-              >
-                  Login
-              </div>
-          ))}
+            >
+                <Link href={"/"} className={"w-32"}>
+                    <Image src={"/logo/logo-no-background.svg"} width={120} height={30} alt={"Logo"} />
+                </Link>
+
+                <div className={"hidden gap-8 px-4 py-2 md:flex"}>
+                    {itemList.map((item, i) => (
+                        <NavbarItem key={i} {...item} />
+                    ))}
+                </div>
+
+                <div className={"hidden px-4 py-2 md:flex"}>
+                    {!authPage &&
+                        (session?.user ? (
+                            <div className="flex items-center gap-4">
+                                <p className="text-xl font-bold text-accent">{session?.user?.username}</p>
+                                <div
+                                    className={
+                                        "rounded-2xl bg-accent px-8 py-2 font-bold shadow-lg transition-[1s] hover:cursor-pointer hover:bg-accent-muted"
+                                    }
+                                    onClick={() => signOut()}
+                                >
+                                    Logout
+                                </div>
+                            </div>
+                        ) : (
+                            <div
+                                className={
+                                    "rounded-2xl bg-accent px-8 py-2 font-bold shadow-lg transition-[1s] hover:cursor-pointer hover:bg-accent-muted"
+                                }
+                                onClick={() => signIn()}
+                            >
+                                Login
+                            </div>
+                        ))}
+                </div>
+
+                <button className="flex py-2 md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
+                    <div className="flex h-8 w-8 items-center justify-center">
+                        {menuOpen ? (
+                            <CloseIcon width={"max"} height={"max"} p={1} color={"white"} />
+                        ) : (
+                            <HamburgerIcon width={"max"} height={"max"} color={"white"} />
+                        )}
+                    </div>
+                </button>
+            </Box>
+            {menuOpen && (
+                <div className="absolute z-10 flex w-screen flex-col items-center bg-primary pb-8 shadow-lg">
+                    <UserCard authPage={authPage} session={session} hidden={false} />
+                    {itemList.map((item, i) => (
+                        <NavbarItem key={i} {...item} className="py-6 text-3xl" />
+                    ))}
+                </div>
+            )}
         </div>
-      </Box>
-    </div>
-  );
+    );
 }
 
 interface ItemInterface {
-  title: string;
-  href: string;
-  dropdownItems?: ItemInterface[];
+    title: string;
+    href: string;
+    dropdownItems?: ItemInterface[];
+    className?: string;
 }
 
 function NavbarItem(props: ItemInterface) {
-  return (
-    <Link
-      href={props.href}
-      className={
-        "font-bold text-lg text-accent py-2 hover:text-accent-muted transition-[1s]"
-      }
-    >
-      {props.title}
-    </Link>
-  );
+    return (
+        <Link
+            href={props.href}
+            className={twMerge(
+                "py-2 text-lg font-bold text-accent transition-[1s] hover:text-accent-muted",
+                props.className
+            )}
+        >
+            {props.title}
+        </Link>
+    );
+}
+
+function UserCard({ authPage, session, hidden }: { authPage: boolean; session: Session | null; hidden: boolean }) {
+    return (
+        <div className={"px-4 py-2 md:flex"}>
+            {!authPage &&
+                (session?.user ? (
+                    <div className="flex items-center gap-4">
+                        <p className="text-xl font-bold text-accent">{session?.user?.username}</p>
+                        <div
+                            className={
+                                "rounded-2xl bg-accent px-8 py-2 font-bold shadow-lg transition-[1s] hover:cursor-pointer hover:bg-accent-muted"
+                            }
+                            onClick={() => signOut()}
+                        >
+                            Logout
+                        </div>
+                    </div>
+                ) : (
+                    <div
+                        className={
+                            "rounded-2xl bg-accent px-8 py-2 font-bold shadow-lg transition-[1s] hover:cursor-pointer hover:bg-accent-muted"
+                        }
+                        onClick={() => signIn()}
+                    >
+                        Login
+                    </div>
+                ))}
+        </div>
+    );
 }
