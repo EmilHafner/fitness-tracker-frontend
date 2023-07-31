@@ -3,11 +3,13 @@ import { AddIcon, TimeIcon } from "@chakra-ui/icons";
 import { Skeleton, useToast } from "@chakra-ui/react";
 import {
     differenceInMilliseconds,
+    differenceInMinutes,
     differenceInSeconds,
     format,
     formatDistanceToNow,
     formatDistanceToNowStrict,
     getMilliseconds,
+    roundToNearestMinutes,
 } from "date-fns";
 import { useRouter } from "next/router";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -32,7 +34,7 @@ interface ExerciseEvent {
 interface Training {
     id: number;
     startDateTime: Date;
-    endDateTime: Date;
+    endDateTime?: Date;
     exerciseEvents?: Array<ExerciseEvent>;
 }
 
@@ -116,7 +118,12 @@ export default function Training() {
                 {router.query.id}
                 <br />
                 {training?.startDateTime && format(new Date(training.startDateTime), "dd.MM.yyyy HH:mm")}
-                {training?.startDateTime && <PassedTime startTime={new Date(training.startDateTime)} />}
+                {training?.startDateTime && (
+                    <PassedTime
+                        startTime={new Date(training.startDateTime)}
+                        endDateTime={training.endDateTime && new Date(training.endDateTime)}
+                    />
+                )}
 
                 {trainingActive && <AddExerciseComponent onClick={addOrUpdateExerciseInTraining} />}
                 {loadNewExercise && <ExerciseSkeleton />}
@@ -153,22 +160,39 @@ function ExerciseSkeleton() {
     return <Skeleton className="h-24 w-full" rounded={10}></Skeleton>;
 }
 
-// TODO: Account for Time Zones
-// ! Currently time difference is 3 hours less than it should be
-function PassedTime({ startTime }: { startTime: Date }) {
-    const [passedMinutes, setPassedMinutes] = useState<any>();
+function PassedTime({ startTime, endDateTime }: { startTime: Date; endDateTime?: Date }) {
+    const [passedTime, setPassedTime] = useState<any>();
     const start = useMemo(() => startTime, [startTime]);
 
     useEffect(() => {
+        if (endDateTime) {
+            let difference = differenceInSeconds(endDateTime, start);
+            setPassedTime(
+                `${Math.floor(difference / 3600)
+                    .toString()
+                    .padStart(2, "0")}:${Math.floor((difference / 60) % 60)
+                    .toString()
+                    .padStart(2, "0")}:${(difference % 60).toString().padStart(2, "0")}`
+            );
+            return;
+        }
         const interval = setInterval(() => {
-            setPassedMinutes(format(new Date() - start, "mm:ss"));
+            let difference = differenceInSeconds(Date.now(), start);
+            setPassedTime(
+                `${Math.floor(difference / 3600)
+                    .toString()
+                    .padStart(2, "0")}:${Math.floor((difference / 60) % 60)
+                    .toString()
+                    .padStart(2, "0")}:${(difference % 60).toString().padStart(2, "0")}`
+            );
         }, 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [endDateTime, start]);
 
     return (
-        <div>
-            <TimeIcon /> {passedMinutes}
+        <div className="flex items-center justify-center gap-2">
+            <TimeIcon height={6} width={6} />
+            <span className="py-1 text-xl font-medium">{passedTime}</span>
         </div>
     );
 }
