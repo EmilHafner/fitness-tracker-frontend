@@ -41,3 +41,11 @@ export async function saveTraining(startdate: Date) {
 export async function stopTraining(trainingId: number) {
   return await axiosI.patch("/training/stop-training/" + trainingId);
 }
+
+export async function getTrainingById(trainingId: number) {
+  return await axiosI.get("/training/" + trainingId);
+}
+
+export async function getExercisesByTrainingId(trainingId: number) {
+  return await axiosI.get("/training/" + trainingId + "/exercises");
+}

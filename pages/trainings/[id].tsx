@@ -13,6 +13,8 @@ import {
 } from "date-fns";
 import { useRouter } from "next/router";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { getExercisesByTrainingId, getTrainingById } from "@/services/axiosInstance";
+import { errorToast } from "@/utils/standardToasts";
 
 interface Set {
     id: number;
@@ -45,56 +47,22 @@ export default function Training() {
     const toast = useToast();
     const [loadNewExercise, setLoadNewExercise] = useState(false);
     const [trainingActive, setTrainingActive] = useState(false);
-    const [exerciseEvents, setExerciseEvents] = useState({} as ExerciseEvent[]);
-
-    // Load training from API
-    const loadTraining = useCallback(() => {
-        return axiosI
-            .get(`/training/${router.query.id}`)
-            .then((res) => {
-                setTraining(res.data);
-            })
-            .catch((e) => {
-                console.log(e);
-                toast({
-                    title: "An Error occured",
-                    description: e.message,
-                    status: "error",
-                    variant: "left-accent",
-                    duration: 4000,
-                    isClosable: true,
-                });
-            });
-    }, [router.query.id, toast]);
-
-    const loadExerciseEvents = useCallback(() => {
-        return axiosI
-            .get(`/training/${router.query.id}/exercises`)
-            .then((res) => {
-                setExerciseEvents(res.data);
-            })
-            .catch((e) => {
-                console.log(e);
-                toast({
-                    title: "An Error occured",
-                    description: e.message,
-                    status: "error",
-                    variant: "left-accent",
-                    duration: 4000,
-                    isClosable: true,
-                });
-            });
-    }, [router.query.id, toast]);
 
     // Load training on first render
     useEffect(() => {
         setIsLoading(true);
         if (!router.query.id) return; // Make sure that no call is mady without a training-id
-        loadTraining().then(() => {
-            setIsLoading(false);
-            setTrainingActive(training && !training.endDateTime);
-        });
-        loadExerciseEvents();
+        getTrainingById(parseInt(router.query.id as string))
+            .then((res) => {
+                setTraining(res.data);
+                setTrainingActive(res.data && !res.data.endDateTime);
+            })
+            .catch((e) => {
+                toast(errorToast("An Error occured", e.message));
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }, [router, toast]);
 
     // Add or update an exercise to the training
