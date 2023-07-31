@@ -1,4 +1,4 @@
-import { axiosI } from "@/services/axiosInstance";
+import { addEmptyExerciseEventToTraining, axiosI } from "@/services/axiosInstance";
 import { AddIcon, TimeIcon } from "@chakra-ui/icons";
 import { Skeleton, useToast } from "@chakra-ui/react";
 import {
@@ -27,7 +27,7 @@ interface ExerciseType {
     bodypart?: string;
 }
 
-interface ExerciseEvent {
+export interface ExerciseEvent {
     id: number;
     exerciseType: ExerciseType;
     sets?: Array<Set>;
@@ -48,10 +48,7 @@ export default function Training() {
     const [loadNewExercise, setLoadNewExercise] = useState(false);
     const [trainingActive, setTrainingActive] = useState(false);
 
-    // Load training on first render
-    useEffect(() => {
-        setIsLoading(true);
-        if (!router.query.id) return; // Make sure that no call is mady without a training-id
+    const loadTrainings = useCallback(() => {
         getTrainingById(parseInt(router.query.id as string))
             .then((res) => {
                 setTraining(res.data);
@@ -63,7 +60,14 @@ export default function Training() {
             .finally(() => {
                 setIsLoading(false);
             });
-    }, [router, toast]);
+    }, [router.query.id, toast]);
+
+    // Load training on first render
+    useEffect(() => {
+        setIsLoading(true);
+        if (!router.isReady) return; // Make sure that no call is mady without a training-id
+        loadTrainings();
+    }, [router, toast, loadTrainings]);
 
     // Add or update an exercise to the training
     const addOrUpdateExerciseInTraining = (exerciseEvent?: ExerciseEvent) => {
@@ -80,6 +84,17 @@ export default function Training() {
         }, 2000);
     };
 
+    const addEmptyExerciseEvent = () => {
+        setLoadNewExercise(true);
+        addEmptyExerciseEventToTraining(training.id)
+            .then(() => {
+                loadTrainings();
+            })
+            .finally(() => {
+                setLoadNewExercise(false);
+            });
+    };
+
     return (
         <div className="flex flex-col items-center ">
             <div className="flex w-5/6 flex-col gap-4">
@@ -93,7 +108,7 @@ export default function Training() {
                     />
                 )}
 
-                {trainingActive && <AddExerciseComponent onClick={addOrUpdateExerciseInTraining} />}
+                {trainingActive && <AddExerciseComponent onClick={addEmptyExerciseEvent} />}
                 {loadNewExercise && <ExerciseSkeleton />}
                 {training.exerciseEvents?.map((exerciseEvent) => {
                     return <ExerciseComponent key={exerciseEvent.id} exerciseEvent={exerciseEvent} />;
@@ -119,7 +134,7 @@ function AddExerciseComponent({ onClick }: { onClick: () => void }) {
 function ExerciseComponent(props: { exerciseEvent: ExerciseEvent }) {
     return (
         <div className=" flex h-24 w-full flex-row items-center justify-center rounded-lg bg-slate-50 shadow-lg">
-            {props.exerciseEvent.exerciseType.name}
+            {props.exerciseEvent.exerciseType?.name}
         </div>
     );
 }
@@ -131,6 +146,7 @@ function ExerciseSkeleton() {
 function PassedTime({ startTime, endDateTime }: { startTime: Date; endDateTime?: Date }) {
     const [passedTime, setPassedTime] = useState<any>();
     const start = useMemo(() => startTime, [startTime]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (endDateTime) {
@@ -142,6 +158,7 @@ function PassedTime({ startTime, endDateTime }: { startTime: Date; endDateTime?:
                     .toString()
                     .padStart(2, "0")}:${(difference % 60).toString().padStart(2, "0")}`
             );
+            setIsLoading(false);
             return;
         }
         const interval = setInterval(() => {
@@ -153,14 +170,22 @@ function PassedTime({ startTime, endDateTime }: { startTime: Date; endDateTime?:
                     .toString()
                     .padStart(2, "0")}:${(difference % 60).toString().padStart(2, "0")}`
             );
+            setIsLoading(false);
         }, 1000);
+
         return () => clearInterval(interval);
     }, [endDateTime, start]);
 
     return (
         <div className="flex items-center justify-center gap-2">
             <TimeIcon height={6} width={6} />
-            <span className="py-1 text-xl font-medium">{passedTime}</span>
+            {isLoading ? (
+                <Skeleton>
+                    <span className="py-1 font-mono text-xl font-medium">00:00:00</span>
+                </Skeleton>
+            ) : (
+                <span className="py-1 text-xl font-medium">{passedTime}</span>
+            )}
         </div>
     );
 }
