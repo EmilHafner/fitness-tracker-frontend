@@ -15,6 +15,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getExercisesByTrainingId, getTrainingById } from "@/services/axiosInstance";
 import { errorToast } from "@/utils/standardToasts";
+import Button from "@/components/basics/Button";
+import ExerciseEventComponent from "@/components/training/exercise/ExerciseEventComponent";
 
 interface Set {
     id: number;
@@ -108,33 +110,29 @@ export default function Training() {
                     />
                 )}
 
-                {trainingActive && <AddExerciseComponent onClick={addEmptyExerciseEvent} />}
+                {/* Add-Button */}
+                <div className="flex items-center justify-center">
+                    {trainingActive && (
+                        <Button variant="big" onClick={addEmptyExerciseEvent} isLoading={loadNewExercise}>
+                            <div className="flex items-center justify-center gap-2">
+                                <AddIcon boxSize={"4"} />
+                                Add Exercise
+                            </div>
+                        </Button>
+                    )}
+                </div>
+
                 {loadNewExercise && <ExerciseSkeleton />}
                 {training.exerciseEvents?.map((exerciseEvent) => {
-                    return <ExerciseComponent key={exerciseEvent.id} exerciseEvent={exerciseEvent} />;
+                    return (
+                        <ExerciseEventComponent
+                            key={exerciseEvent.id}
+                            exerciseEvent={exerciseEvent}
+                            onClick={() => router.push("/trainings/exercises/" + exerciseEvent.id)}
+                        />
+                    );
                 })}
             </div>
-        </div>
-    );
-}
-
-function AddExerciseComponent({ onClick }: { onClick: () => void }) {
-    return (
-        <button
-            className="flex h-24 w-full flex-col items-center justify-center
-    rounded-xl shadow-lg  outline outline-1 outline-slate-300 hover:bg-slate-200"
-            onClick={onClick}
-        >
-            <AddIcon boxSize={"6"} className="" />
-            Add Exercise
-        </button>
-    );
-}
-
-function ExerciseComponent(props: { exerciseEvent: ExerciseEvent }) {
-    return (
-        <div className=" flex h-24 w-full flex-row items-center justify-center rounded-lg bg-slate-50 shadow-lg">
-            {props.exerciseEvent.exerciseType?.name}
         </div>
     );
 }
