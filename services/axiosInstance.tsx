@@ -1,5 +1,6 @@
 import { ExerciseEvent } from "@/pages/trainings/[id]";
 import axios, { AxiosResponse } from "axios";
+import { ExerciseType } from "global-types";
 import { getSession } from "next-auth/react";
 
 export const axiosI = axios.create({
@@ -54,4 +55,9 @@ export async function getExercisesByTrainingId(trainingId: number) {
 
 export async function addEmptyExerciseEventToTraining(trainingId: number): Promise<AxiosResponse<ExerciseEvent, any>> {
     return await axiosI.post(`/training/${trainingId}/exerciseEvents`, {});
+}
+
+export async function searchExerciseTypesByName(name: string | undefined): Promise<AxiosResponse<ExerciseType[], any>> {
+    if (!(name && name.trim().length > 0)) return await axiosI.get("/exerciseTypes/all");
+    return await axiosI.get(`/exerciseTypes/search/${name}`);
 }
