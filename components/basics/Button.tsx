@@ -1,6 +1,6 @@
 import { SpinnerIcon } from "@chakra-ui/icons";
 import { useEffect } from "react";
-import { twMerge } from "tailwind-merge";
+import { twJoin, twMerge } from "tailwind-merge";
 
 type ButtonProps = {
     className?: string;
@@ -22,13 +22,13 @@ export default function Button(props: ButtonProps) {
             {...rest}
             className={twMerge(
                 sizeClasses +
-                    (disabled && "cursor-not-allowed opacity-50") +
-                    "relative rounded-xl bg-accent font-medium shadow-xl hover:bg-accent-muted",
+                    (disabled && "cursor-not-allowed opacity-50 ") +
+                    " relative flex items-center justify-center rounded-xl bg-accent font-medium shadow-xl hover:bg-accent-muted",
                 className
             )}
         >
-            <div className={(!isLoading && "opacity-0 ") + "absolute flex h-full w-full items-center justify-center"}>
-                <SpinnerIcon className="absolute animate-spin"></SpinnerIcon>
+            <div className={(!isLoading && "opacity-0 ") + " absolute flex items-center justify-center"}>
+                <SpinnerIcon className="animate-spin"></SpinnerIcon>
             </div>
 
             <span className={isLoading ? "opacity-0" : "opacity-100"}>{children}</span>
