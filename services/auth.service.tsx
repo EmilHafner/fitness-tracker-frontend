@@ -3,8 +3,8 @@ import axios from "axios";
 const axiosAuth = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL + "/auth",
     headers: {
-        'Content-Type': 'application/json'
-    }
+        "Content-Type": "application/json",
+    },
 });
 
 export async function registerUser(firstName: string, lastName: string, username: string, password: string) {
@@ -12,13 +12,13 @@ export async function registerUser(firstName: string, lastName: string, username
         firstName: firstName,
         lastName: lastName,
         username: username,
-        password: password
+        password: password,
     });
 }
 
 export async function loginUser(username: string, password: string) {
     return await axiosAuth.post("/authenticate", {
         username: username,
-        password: password
+        password: password,
     });
 }
