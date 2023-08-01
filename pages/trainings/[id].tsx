@@ -89,7 +89,8 @@ export default function Training() {
     const addEmptyExerciseEvent = () => {
         setLoadNewExercise(true);
         addEmptyExerciseEventToTraining(training.id)
-            .then(() => {
+            .then((res) => {
+                router.push("/trainings/exercises/" + res.data.id);
                 loadTrainings();
             })
             .finally(() => {
@@ -182,7 +183,7 @@ function PassedTime({ startTime, endDateTime }: { startTime: Date; endDateTime?:
                     <span className="py-1 font-mono text-xl font-medium">00:00:00</span>
                 </Skeleton>
             ) : (
-                <span className="py-1 text-xl font-medium">{passedTime}</span>
+                <span className="w-20 py-1 text-center text-xl font-medium">{passedTime}</span>
             )}
         </div>
     );
