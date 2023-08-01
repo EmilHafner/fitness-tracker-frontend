@@ -1,3 +1,4 @@
+import { ExerciseEvent } from "@/pages/trainings/[id]";
 import axios, { AxiosResponse } from "axios";
 import { getSession } from "next-auth/react";
 
@@ -51,6 +52,6 @@ export async function getExercisesByTrainingId(trainingId: number) {
     return await axiosI.get("/training/" + trainingId + "/exercises");
 }
 
-export async function addEmptyExerciseEventToTraining(trainingId: number) {
+export async function addEmptyExerciseEventToTraining(trainingId: number): Promise<AxiosResponse<ExerciseEvent, any>> {
     return await axiosI.post(`/training/${trainingId}/exerciseEvents`, {});
 }
