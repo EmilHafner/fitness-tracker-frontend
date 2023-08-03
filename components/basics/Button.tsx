@@ -27,11 +27,12 @@ export default function Button(props: ButtonProps) {
                 className
             )}
         >
+            {/* TODO: Change this, so that the spinner is not always animated (with opacity-0) */}
             <div className={(!isLoading && "opacity-0 ") + " absolute flex items-center justify-center"}>
                 <SpinnerIcon className="animate-spin"></SpinnerIcon>
             </div>
 
-            <span className={isLoading ? "opacity-0" : "opacity-100"}>{children}</span>
+            <span className={"" + (isLoading && "opacity-0")}>{children}</span>
         </button>
     );
 }
