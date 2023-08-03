@@ -17,6 +17,7 @@ import { getExercisesByTrainingId, getTrainingById } from "@/services/axiosInsta
 import { errorToast } from "@/utils/standardToasts";
 import Button from "@/components/basics/Button";
 import ExerciseEventComponent from "@/components/training/exercise/ExerciseEventComponent";
+import { useExerciseEvents } from "@/hooks/useExerciseEvents";
 
 interface Set {
     id: number;
@@ -33,6 +34,7 @@ export interface ExerciseEvent {
     id: number;
     exerciseType: ExerciseType;
     sets?: Array<Set>;
+    orderNumber: number;
 }
 
 interface Training {
@@ -49,6 +51,10 @@ export default function Training() {
     const toast = useToast();
     const [loadNewExercise, setLoadNewExercise] = useState(false);
     const [trainingActive, setTrainingActive] = useState(false);
+    const { exerciseEvents, 
+        addExerciseEvent, 
+        updateExerciseEvents, 
+        exerciseEventsLoading } = useExerciseEvents(parseInt(router.query.id as string));
 
     const loadTrainings = useCallback(() => {
         getTrainingById(parseInt(router.query.id as string))
@@ -124,7 +130,7 @@ export default function Training() {
                 </div>
 
                 {loadNewExercise && <ExerciseSkeleton />}
-                {training.exerciseEvents?.map((exerciseEvent) => {
+                {exerciseEvents.map((exerciseEvent) => {
                     return (
                         <ExerciseEventComponent
                             key={exerciseEvent.id}
