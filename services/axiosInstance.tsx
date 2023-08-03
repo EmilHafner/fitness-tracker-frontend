@@ -50,7 +50,7 @@ export async function getTrainingById(trainingId: number) {
 }
 
 export async function getExercisesByTrainingId(trainingId: number) {
-    return await axiosI.get("/training/" + trainingId + "/exercises");
+    return await axiosI.get("/training/" + trainingId + "/exerciseEvents");
 }
 
 export async function addEmptyExerciseEventToTraining(trainingId: number): Promise<AxiosResponse<ExerciseEvent, any>> {
@@ -60,4 +60,23 @@ export async function addEmptyExerciseEventToTraining(trainingId: number): Promi
 export async function searchExerciseTypesByName(name: string | undefined): Promise<AxiosResponse<ExerciseType[], any>> {
     if (!(name && name.trim().length > 0)) return await axiosI.get("/exerciseTypes/all");
     return await axiosI.get(`/exerciseTypes/search/${name}`);
+}
+
+export async function setExerciseTypeOnExercise(exerciseId: number, exerciseTypeId: number) {
+    return await axiosI.put(`/exerciseEvents/${exerciseId}/exerciseType/${exerciseTypeId}`)
+}
+
+export async function getExerciseEventById(exerciseEventId: number): Promise<AxiosResponse<ExerciseEvent, any>> {
+    return await axiosI.get(`/exerciseEvents/${exerciseEventId}`);
+}
+
+export async function getSetsByExerciseId(exerciseId: number): Promise<AxiosResponse<any, any>> {
+    return await axiosI.get(`/exerciseEvents/${exerciseId}/sets`);
+}
+
+export async function addSetToExerciseEvent(exerciseEventId: number, weight: number, reps: number) {
+    return await axiosI.post(`/exerciseEvents/${exerciseEventId}/sets`, {
+        weight,
+        reps,
+    });
 }
