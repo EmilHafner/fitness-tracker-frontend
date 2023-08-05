@@ -4,10 +4,10 @@ import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Button from "./basics/Button";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { twMerge } from "tailwind-merge";
-import { Session } from "next-auth";
+import { UserCard } from "./UserCard";
+import { NavbarItem } from "./NavbarItem";
+import { itemList } from "@/data/variables";
 
 export default function Navbar() {
     const { data: session } = useSession();
@@ -24,19 +24,9 @@ export default function Navbar() {
         }
     }, [router.asPath]);
 
-    const itemList: ItemInterface[] = [
-        { title: "Trainings", href: "/trainings" },
-        { title: "Plans", href: "/plans" },
-        { title: "Exercises", href: "/exercises" },
-    ];
-
     return (
-        <div className={""}>
-            <Box
-                className={
-                    "flex w-full flex-wrap items-center justify-between bg-primary px-12 py-4 shadow-xl md:px-16"
-                }
-            >
+        <div className={"relative z-50 mb-6 border-b-2 bg-stone-200"}>
+            <Box className={"z-50 flex w-full flex-wrap items-center justify-between bg-stone-100 px-12 py-4 md:px-16"}>
                 <Link href={"/"} className={"w-32"}>
                     <Image src={"/logo/logo-no-background.svg"} width={120} height={30} alt={"Logo"} />
                 </Link>
@@ -76,72 +66,21 @@ export default function Navbar() {
                 <button className="flex py-2 md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
                     <div className="flex h-8 w-8 items-center justify-center">
                         {menuOpen ? (
-                            <CloseIcon width={"max"} height={"max"} p={1} color={"white"} />
+                            <CloseIcon width={"max"} height={"max"} p={1} color={"black"} />
                         ) : (
-                            <HamburgerIcon width={"max"} height={"max"} color={"white"} />
+                            <HamburgerIcon width={"max"} height={"max"} color={"black"} />
                         )}
                     </div>
                 </button>
             </Box>
             {menuOpen && (
-                <div className="absolute z-10 flex w-screen flex-col items-center bg-primary pb-8 shadow-lg">
-                    <UserCard authPage={authPage} session={session} hidden={false} />
+                <div className="absolute z-10 flex w-screen flex-col items-center border-b-2 bg-stone-100 pb-8 ">
+                    <UserCard authPage={authPage} session={session} />
                     {itemList.map((item, i) => (
                         <NavbarItem key={i} {...item} className="py-6 text-3xl" />
                     ))}
                 </div>
             )}
-        </div>
-    );
-}
-
-interface ItemInterface {
-    title: string;
-    href: string;
-    dropdownItems?: ItemInterface[];
-    className?: string;
-}
-
-function NavbarItem(props: ItemInterface) {
-    return (
-        <Link
-            href={props.href}
-            className={twMerge(
-                "py-2 text-lg font-bold text-accent transition-[1s] hover:text-accent-muted",
-                props.className
-            )}
-        >
-            {props.title}
-        </Link>
-    );
-}
-
-function UserCard({ authPage, session, hidden }: { authPage: boolean; session: Session | null; hidden: boolean }) {
-    return (
-        <div className={"px-4 py-2 md:flex"}>
-            {!authPage &&
-                (session?.user ? (
-                    <div className="flex items-center gap-4">
-                        <p className="text-xl font-bold text-accent">{session?.user?.username}</p>
-                        <div
-                            className={
-                                "rounded-2xl bg-accent px-8 py-2 font-bold shadow-lg transition-[1s] hover:cursor-pointer hover:bg-accent-muted"
-                            }
-                            onClick={() => signOut()}
-                        >
-                            Logout
-                        </div>
-                    </div>
-                ) : (
-                    <div
-                        className={
-                            "rounded-2xl bg-accent px-8 py-2 font-bold shadow-lg transition-[1s] hover:cursor-pointer hover:bg-accent-muted"
-                        }
-                        onClick={() => signIn()}
-                    >
-                        Login
-                    </div>
-                ))}
         </div>
     );
 }
