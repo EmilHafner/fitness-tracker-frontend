@@ -11,4 +11,11 @@ declare module "global-types" {
         weight: number;
         orderNumber: number;
     }
+
+    interface ItemInterface {
+        title: string;
+        href: string;
+        dropdownItems?: ItemInterface[];
+        className?: string;
+    }
 }
