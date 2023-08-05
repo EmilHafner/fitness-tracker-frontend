@@ -1,6 +1,7 @@
 import { searchExerciseTypesByName, setExerciseTypeOnExercise } from "@/services/axiosInstance";
 import { ExerciseType } from "global-types";
 import { useEffect, useState } from "react";
+import { useDebounce } from "./useDebounce";
 
 
 export function useExerciseTypes(initialType?: string) {
@@ -9,6 +10,7 @@ export function useExerciseTypes(initialType?: string) {
     const [exerciseTypesLoading, setExerciseTypesLoading] = useState<boolean>(true);
     const [unorderdExerciseTypes, setUnorderedExerciseTypes] = useState<ExerciseType[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>(initialType || "");
+    const { debouncedValue: debouncedSearchTerm } = useDebounce<string>(searchTerm, 300);
 
     const updateExerciseTypes = () => {
         setExerciseTypesLoading(true);
@@ -29,7 +31,7 @@ export function useExerciseTypes(initialType?: string) {
 
     useEffect(() => {
         setExerciseTypesLoading(true);
-        searchExerciseTypesByName(searchTerm)
+        searchExerciseTypesByName(debouncedSearchTerm)
             .then((res) => {
                 setUnorderedExerciseTypes(res.data);
             })
@@ -39,7 +41,7 @@ export function useExerciseTypes(initialType?: string) {
             .finally(() => {
                 setExerciseTypesLoading(false);
             });
-    }, [searchTerm]);
+    }, [debouncedSearchTerm]);
 
     useEffect(() => {
         setSearchTerm(initialType || "")
