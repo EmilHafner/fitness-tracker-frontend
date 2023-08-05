@@ -1,5 +1,14 @@
 import { getExerciseEventById } from "@/services/axiosInstance";
-import { Collapse, Fade, Select, SlideFade, useDisclosure, useOutsideClick } from "@chakra-ui/react";
+import {
+    Collapse,
+    Fade,
+    InputGroup,
+    InputRightElement,
+    Select,
+    SlideFade,
+    useDisclosure,
+    useOutsideClick,
+} from "@chakra-ui/react";
 import { ExerciseType } from "global-types";
 import { useRouter } from "next/router";
 import { Input } from "@chakra-ui/react";
@@ -13,6 +22,7 @@ import Button from "@/components/basics/Button";
 import { useExerciseTypes } from "@/hooks/useExerciseTypes";
 import LoadingPage from "@/components/loading/LoadingPage";
 import TrainingsSetComponent from "@/components/training/exercise/TrainingsSetComponent";
+import { AddIcon, CheckCircleIcon, ChevronDownIcon } from "@chakra-ui/icons";
 
 export default function Exercise() {
     const router = useRouter();
@@ -50,19 +60,20 @@ export default function Exercise() {
         <div className="flex flex-col items-center justify-center">
             <div className="w-5/6">
                 {exerciseEvent.id}
-                <SelectExerciseType
-                    initialType={exerciseEvent.exerciseType?.name}
-                    exerciseId={router.query?.exerciseId as string}
-                />
-
-                <Button
-                    onClick={() => {
-                        addSet({ reps: 5, weight: 5 });
-                        //updateSets();
-                    }}
-                >
-                    Add set
-                </Button>
+                <div className="flex w-full flex-row items-center justify-between">
+                    <div className="relative z-10 w-3/5 max-w-md py-4">
+                        <SelectExerciseType
+                            initialType={exerciseEvent.exerciseType?.name}
+                            exerciseId={router.query?.exerciseId as string}
+                        />
+                    </div>
+                    <Button className="bg-blue-400 hover:bg-blue-300 max-w-sm w-2/5">
+                        <div className="flex items-center gap-2">
+                            <CheckCircleIcon />
+                            <span className="font-medium">Complete</span>
+                        </div>
+                    </Button>
+                </div>
 
                 <div className="flex flex-col gap-4">
                     {sets.map((set) => {
@@ -70,11 +81,17 @@ export default function Exercise() {
                     })}
                 </div>
 
-                <div>asdfasdf</div>
-                <div>asdfasdf</div>
-                <div className="bg-accent">asdfasdf</div>
-                <div>asdfasdf</div>
-                <div>asdfasdf</div>
+                <div className="relative flex justify-center p-4">
+                    <Button
+                        variant="big"
+                        onClick={() => {
+                            addSet({ reps: 5, weight: 5 });
+                        }}
+                    >
+                        <AddIcon boxSize={"4"} />
+                        Add set
+                    </Button>
+                </div>
             </div>
         </div>
     );
@@ -114,11 +131,16 @@ function SelectExerciseType({ initialType, exerciseId }: { initialType?: string;
     };
 
     return (
-        <div ref={ref} className="relative z-10 w-full">
-            <Input onClick={onOpen} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}></Input>
+        <div ref={ref} className="relative w-full">
+            <InputGroup onClick={onOpen}>
+                <Input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <InputRightElement>
+                    <ChevronDownIcon width={6} height={6} />
+                </InputRightElement>
+            </InputGroup>
             <div className="absolute w-full">
-                <Collapse in={isOpen} animateOpacity>
-                    <div className="flex flex-col items-start">
+                <Collapse in={isOpen}>
+                    <div className="flex flex-col items-start bg-white">
                         {exerciseTypes?.map((type) => {
                             return <ExerciseTypeOption type={type} key={type.id} setOption={setOption} />;
                         })}
@@ -132,7 +154,7 @@ function SelectExerciseType({ initialType, exerciseId }: { initialType?: string;
 function ExerciseTypeOption({ type, setOption }: { type: ExerciseType; setOption: Function }) {
     return (
         <button
-            className="h-10 w-full rounded bg-slate-50 bg-opacity-90 p-2 outline outline-1 -outline-offset-2 outline-gray-200 hover:bg-blue-100 focus:outline-2 focus:outline-blue-400"
+            className="z-10 h-10 w-full rounded p-2 outline outline-1 -outline-offset-2 outline-gray-200 hover:bg-blue-100 focus:outline-2 focus:outline-blue-400"
             onClick={() => setOption(type.name)}
         >
             {type.name}
