@@ -36,11 +36,14 @@ export default function Exercise() {
             });
     }, [router]);
 
+    // Loading animation while fetching data
     if (exerciseEventLoading) {
         return <LoadingPage />;
     }
 
+    // If the exercise is not found, show an error
     if (loadingError) {
+        router.push("/404")
         return <div>Exercise not found</div>;
     }
 
