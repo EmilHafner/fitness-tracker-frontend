@@ -1,4 +1,3 @@
-import { SpinnerIcon } from "@chakra-ui/icons";
 import { AbsoluteCenter } from "@chakra-ui/react";
 
 /**
@@ -6,12 +5,8 @@ import { AbsoluteCenter } from "@chakra-ui/react";
  */
 export default function LoadingPage() {
     return (
-        <div className="flex flex-col items-center justify-center">
-            <AbsoluteCenter>
-                <div className="text-accent">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            </AbsoluteCenter>
-        </div>
+        <AbsoluteCenter>
+            <span className="loading loading-spinner loading-lg text-stone-500"></span>
+        </AbsoluteCenter>
     );
 }

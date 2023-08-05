@@ -1,5 +1,3 @@
-import { SpinnerIcon } from "@chakra-ui/icons";
-import { useEffect } from "react";
 import { twJoin, twMerge } from "tailwind-merge";
 
 type ButtonProps = {
@@ -21,15 +19,15 @@ export default function Button(props: ButtonProps) {
         <button
             {...rest}
             className={twMerge(
-                sizeClasses +
-                    (disabled && "cursor-not-allowed opacity-50 ") +
-                    " relative flex items-center justify-center rounded-xl bg-accent font-medium shadow-xl hover:bg-accent-muted",
+                twJoin(sizeClasses, (disabled && "cursor-not-allowed opacity-50 "),
+                    " relative flex items-center justify-center rounded-xl bg-accent font-medium shadow-xl hover:bg-accent-muted"),
                 className
             )}
         >
             {/* TODO: Change this, so that the spinner is not always animated (with opacity-0) */}
             <div className={(!isLoading && "opacity-0 ") + " absolute flex items-center justify-center"}>
-                <SpinnerIcon className="animate-spin"></SpinnerIcon>
+                <span className="loading loading-spinner loading-sm"></span>
+                {/* <SpinnerIcon className="animate-spin"></SpinnerIcon> */}
             </div>
 
             <span className={"" + (isLoading && "opacity-0")}>{children}</span>
