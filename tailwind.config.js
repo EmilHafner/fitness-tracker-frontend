@@ -4,6 +4,7 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/flowbite/**/*.js"
   ],
   theme: {
     extend: {
@@ -22,7 +23,10 @@ module.exports = {
         abort: "#f1634f",
         "abort-muted": "#e14135",
       },
+      animation: {
+        "spin-slow": "spin 1.5s linear infinite",
+      }
     },
   },
-  plugins: [],
+  plugins: [require("daisyui"), require("flowbite/plugin")],
 };
