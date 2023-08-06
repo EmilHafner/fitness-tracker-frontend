@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Set } from "global-types";
-import { addSetToExerciseEvent, getSetsByExerciseId } from "@/services/axiosInstance";
+import { addSetToExerciseEvent, getSetsByExerciseId, updateSet } from "@/services/axiosInstance";
 
 interface AddSet {
     weight?: number;
@@ -21,10 +21,21 @@ export function useSets(exerciseId: string | number) {
             })
             .catch((err) => {
                 console.log(err);
-            }).finally(() => {
+            })
+            .finally(() => {
                 setSetsLoading(false);
             });
-    }
+    };
+
+    const saveSets = () => {
+        console.log(sets);
+        sets.forEach((set) => {
+            if (!set.id) return;
+            if (typeof set.weight == "string") set.weight = 0;
+            if (typeof set.reps == "string") set.reps = 0;
+            updateSet(set.id, set.weight, set.reps);
+        });
+    };
 
     useEffect(() => {
         setSetsLoading(true);
@@ -42,12 +53,23 @@ export function useSets(exerciseId: string | number) {
 
     useEffect(() => {
         setSets(unorderdSets.sort((a, b) => a.orderNumber - b.orderNumber));
-    }, [unorderdSets])
+    }, [unorderdSets]);
 
-    const addSet = (set: AddSet) => { 
-        addSetToExerciseEvent(exerciseIdNumber, set.weight || 0, set.reps || 0);
-        updateSets();
-    }
+    const addSet = (set: AddSet) => {
+        addSetToExerciseEvent(exerciseIdNumber, set.weight || 0, set.reps || 0).then(() => {
+            updateSets();
+        });
+    };
 
-    return { sets, addSet, updateSets, setsLoading }
+    const changeSetLocally = (set: Set) => {
+        const newSets = sets.map((s) => {
+            if (s.id == set.id) {
+                return set;
+            }
+            return s;
+        });
+        setUnorderedSets(newSets);
+    };
+
+    return { sets, addSet, updateSets, setsLoading, changeSetLocally, saveSets };
 }
