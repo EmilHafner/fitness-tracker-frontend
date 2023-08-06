@@ -1,5 +1,5 @@
-import { addEmptyExerciseEventToTraining, axiosI } from "@/services/axiosInstance";
-import { AddIcon, TimeIcon } from "@chakra-ui/icons";
+import { addEmptyExerciseEventToTraining, axiosI, stopTraining } from "@/services/axiosInstance";
+import { AddIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
 import { Skeleton, useToast } from "@chakra-ui/react";
 import {
     differenceInMilliseconds,
@@ -18,12 +18,8 @@ import { errorToast } from "@/utils/standardToasts";
 import Button from "@/components/basics/Button";
 import ExerciseEventComponent from "@/components/training/exercise/ExerciseEventComponent";
 import { useExerciseEvents } from "@/hooks/useExerciseEvents";
+import { Set } from "global-types";
 
-interface Set {
-    id: number;
-    weight?: number;
-    reps?: number;
-}
 interface ExerciseType {
     id: number;
     name: string;
@@ -33,7 +29,7 @@ interface ExerciseType {
 export interface ExerciseEvent {
     id: number;
     exerciseType: ExerciseType;
-    sets?: Array<Set>;
+    trainingsSets?: Array<Set>;
     orderNumber: number;
 }
 
@@ -51,10 +47,9 @@ export default function Training() {
     const toast = useToast();
     const [loadNewExercise, setLoadNewExercise] = useState(false);
     const [trainingActive, setTrainingActive] = useState(false);
-    const { exerciseEvents, 
-        addExerciseEvent, 
-        updateExerciseEvents, 
-        exerciseEventsLoading } = useExerciseEvents(parseInt(router.query.id as string));
+    const { exerciseEvents, addExerciseEvent, updateExerciseEvents, exerciseEventsLoading } = useExerciseEvents(
+        parseInt(router.query.id as string)
+    );
 
     const loadTrainings = useCallback(() => {
         getTrainingById(parseInt(router.query.id as string))
@@ -96,7 +91,7 @@ export default function Training() {
         setLoadNewExercise(true);
         addEmptyExerciseEventToTraining(training.id)
             .then((res) => {
-                router.push("/trainings/exercises/" + res.data.id);
+                router.push("/trainings/" + training.id + "/exercises/" + res.data.id);
                 loadTrainings();
             })
             .finally(() => {
@@ -104,12 +99,17 @@ export default function Training() {
             });
     };
 
+    const stopThisTraining = () => {
+        stopTraining(training.id);
+        loadTrainings();
+    };
+
     return (
         <div className="flex flex-col items-center ">
-            <div className="flex w-5/6 flex-col gap-4">
-                {router.query.id}
-                <br />
-                {training?.startDateTime && format(new Date(training.startDateTime), "dd.MM.yyyy HH:mm")}
+            <div className="flex w-5/6 flex-col gap-4 pb-6">
+                <span className="text-2xl font-bold text-stone-800">
+                    {training?.startDateTime && format(new Date(training.startDateTime), "dd. MMM, yyyy HH:mm")}
+                </span>
                 {training?.startDateTime && (
                     <PassedTime
                         startTime={new Date(training.startDateTime)}
@@ -118,16 +118,23 @@ export default function Training() {
                 )}
 
                 {/* Add-Button */}
-                <div className="flex items-center justify-center">
-                    {trainingActive && (
+                {trainingActive && (
+                    <div className="flex items-center justify-center gap-10">
                         <Button variant="big" onClick={addEmptyExerciseEvent} isLoading={loadNewExercise}>
                             <div className="flex items-center justify-center gap-2">
                                 <AddIcon boxSize={"4"} />
                                 Add Exercise
                             </div>
                         </Button>
-                    )}
-                </div>
+
+                        <Button variant="big" onClick={stopThisTraining}>
+                            <div className="flex items-center justify-center gap-2">
+                                <CheckCircleIcon height={6} width={6} />
+                                Stop training
+                            </div>
+                        </Button>
+                    </div>
+                )}
 
                 {loadNewExercise && <ExerciseSkeleton />}
                 {exerciseEvents.map((exerciseEvent) => {
@@ -135,7 +142,7 @@ export default function Training() {
                         <ExerciseEventComponent
                             key={exerciseEvent.id}
                             exerciseEvent={exerciseEvent}
-                            onClick={() => router.push("/trainings/exercises/" + exerciseEvent.id)}
+                            onClick={() => router.push("/trainings/" + training.id + "/exercises/" + exerciseEvent.id)}
                         />
                     );
                 })}

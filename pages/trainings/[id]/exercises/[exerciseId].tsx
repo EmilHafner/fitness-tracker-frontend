@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import { getSession } from "next-auth/react";
 import { GetServerSideProps } from "next";
-import { ExerciseEvent } from "../[id]";
+import { ExerciseEvent } from "..";
 import { useSets } from "@/hooks/useSets";
 import Button from "@/components/basics/Button";
 import LoadingPage from "@/components/loading/LoadingPage";
@@ -15,7 +15,7 @@ import SelectExerciseType from "@/components/training/exercise/SelectExerciseTyp
 export default function Exercise() {
     const router = useRouter();
     const [exerciseEvent, setExerciseEvent] = useState<ExerciseEvent>({} as ExerciseEvent);
-    const { sets, addSet } = useSets(parseInt(router.query?.exerciseId as string));
+    const { sets, addSet, saveSets, changeSetLocally } = useSets(parseInt(router.query?.exerciseId as string));
     const [exerciseEventLoading, setExerciseEventLoading] = useState<boolean>(true);
     const [loadingError, setLoadingError] = useState<boolean>(false);
 
@@ -36,6 +36,11 @@ export default function Exercise() {
             });
     }, [router]);
 
+    const onComplete = () => {
+        saveSets();
+        router.push(`/trainings/${router.query.id}`);
+    }
+
     // Loading animation while fetching data
     if (exerciseEventLoading) {
         return <LoadingPage />;
@@ -43,14 +48,13 @@ export default function Exercise() {
 
     // If the exercise is not found, show an error
     if (loadingError) {
-        router.push("/404")
+        router.push("/404");
         return <div>Exercise not found</div>;
     }
 
     return (
         <div className="flex flex-col items-center justify-center">
             <div className="w-5/6">
-                {exerciseEvent.id}
                 <div className="flex w-full flex-row items-center justify-between">
                     <div className="relative z-10 w-3/5 max-w-md py-4">
                         <SelectExerciseType
@@ -58,7 +62,8 @@ export default function Exercise() {
                             exerciseId={router.query?.exerciseId as string}
                         />
                     </div>
-                    <Button className="bg-blue-400 hover:bg-blue-300 max-w-sm w-2/6">
+                    <Button className="w-2/6 max-w-sm bg-blue-400 hover:bg-blue-300"
+                    onClick={saveSets}>
                         <div className="flex items-center gap-2">
                             <CheckCircleIcon />
                             <span className="font-medium">Complete</span>
@@ -68,7 +73,7 @@ export default function Exercise() {
 
                 <div className="flex flex-col gap-4">
                     {sets.map((set) => {
-                        return <TrainingsSetComponent key={set.id} set={set} />;
+                        return <TrainingsSetComponent key={set.id} set={set} changeSetLocally={changeSetLocally} />;
                     })}
                 </div>
 
@@ -76,7 +81,7 @@ export default function Exercise() {
                     <Button
                         variant="big"
                         onClick={() => {
-                            addSet({ reps: 5, weight: 5 });
+                            addSet({});
                         }}
                     >
                         <AddIcon boxSize={"4"} />
