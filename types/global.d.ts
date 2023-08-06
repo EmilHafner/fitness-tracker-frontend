@@ -6,9 +6,9 @@ declare module "global-types" {
     }
 
     interface Set {
-        id?: number;
-        reps: number;
-        weight: number;
+        id: number;
+        reps: number | string;
+        weight: number | string;
         orderNumber: number;
     }
 
