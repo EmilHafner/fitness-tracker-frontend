@@ -80,3 +80,10 @@ export async function addSetToExerciseEvent(exerciseEventId: number, weight: num
         reps,
     });
 }
+
+export async function updateSet(setId: number, weight: number, reps: number) {
+    return await axiosI.put(`/trainingsSets/${setId}`, {
+        weight,
+        reps,
+    });
+}
