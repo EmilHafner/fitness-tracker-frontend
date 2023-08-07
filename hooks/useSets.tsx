@@ -68,7 +68,8 @@ export function useSets(exerciseId: string | number) {
             }
             return s;
         });
-        setUnorderedSets(newSets);
+        setSets(newSets);
+        saveSets();
     };
 
     return { sets, addSet, updateSets, setsLoading, changeSetLocally, saveSets };
