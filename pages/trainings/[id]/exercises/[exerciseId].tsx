@@ -63,7 +63,7 @@ export default function Exercise() {
                         />
                     </div>
                     <Button className="w-2/6 max-w-sm bg-blue-400 hover:bg-blue-300"
-                    onClick={saveSets}>
+                    onClick={onComplete}>
                         <div className="flex items-center gap-2">
                             <CheckCircleIcon />
                             <span className="font-medium">Complete</span>
