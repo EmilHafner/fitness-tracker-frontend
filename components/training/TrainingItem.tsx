@@ -2,11 +2,14 @@ import { useBoolean } from "@chakra-ui/hooks";
 import { format, differenceInDays, intervalToDuration, formatDuration } from "date-fns";
 import { useRouter } from "next/router";
 import { stopTraining } from "@/services/axiosInstance";
+import { ExerciseEvent } from "@/pages/trainings/[id]";
+import { useEffect, useState } from "react";
 
 export interface TrainingItemInterface {
     id: number;
     startDateTime: Date;
     endDateTime: Date;
+    exerciseEvents: ExerciseEvent[];
 }
 
 export default function TrainingItem(props: TrainingItemInterface & { reloadItems: () => void }) {
@@ -15,12 +18,20 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
 
     const start: Date = new Date(props.startDateTime);
     const end: Date | null = props.endDateTime ? new Date(props.endDateTime) : null;
+    const { exerciseEvents } = props;
+    const [sortedExerciseEvents, setSortedExerciseEvents] = useState<ExerciseEvent[]>([]);
     const active = !end;
 
     // TODO: Add Icons for records
     // TODO: Add delete and edit button
     // TODO: Handle mutliple days differently
     // TODO: Highlight Trainings which are not completed. And add complete-Button to them
+
+    useEffect(() => {
+        if (!exerciseEvents) return;
+        let sorted = exerciseEvents.sort((a, b) => a.orderNumber - b.orderNumber);
+        setSortedExerciseEvents(sorted);
+    }, [exerciseEvents])
 
     const getStartDateString = (): string => {
         return format(start, "MMMM do");
@@ -37,25 +48,8 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
         return `${d.hours}h ${d.minutes}m`;
     };
 
-    const getTimeFromTo = (): string => {
-        if (!end) {
-            return format(start, "HH:mm");
-        }
-        if (differenceInDays(end, start) > 1) {
-            return format(start, "HH:mm") + " to " + format(end, "HH:mm '(different day: ' dd.MM.yyyy')'");
-        }
-        return format(start, "HH:mm") + " to " + format(end, "HH:mm");
-    };
-
     const onClick = () => {
         router.push("trainings/" + props.id);
-    };
-
-    const stopThisTraining = (e: React.MouseEvent<any>) => {
-        setLoading.on();
-        e.stopPropagation();
-        stopTraining(props.id).then(() => props.reloadItems());
-        setLoading.off();
     };
 
     const getTitle = (): string => {
@@ -72,6 +66,25 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
                 return "Evening Training";
             }
         }
+    };
+
+    const getAverageSet = (exerciseEvents: ExerciseEvent[]): string => {
+        let repsSum = 0;
+        let weightSum = 0;
+        let count = 0;
+        exerciseEvents.forEach((exerciseEvent) => {
+            if (!exerciseEvent.trainingsSets) return;
+            exerciseEvent.trainingsSets.forEach((set) => {
+                repsSum += set.reps as number;
+                weightSum += set.weight as number;
+                count++;
+            });
+        });
+        if (count === 0) return "0.0 kg x 0.0";
+        let avgReps = repsSum / count;
+        let avgWeight = weightSum / count;
+        if (!avgReps) return "0.0 kg x 0.0";
+        return `${avgWeight.toFixed(1)} kg x ${avgReps.toFixed(1)}`;
     };
 
     return (
@@ -105,30 +118,15 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
                         <span>Exercise</span>
                         <span>Avg. Set</span>
                     </div>
-                    <div className="flex justify-between">
-                        <span>Exercise name is long</span>
-                        <span>25 kg x 12</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Exercise name</span>
-                        <span>25 kg x 12</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Exercise name</span>
-                        <span>25 kg x 12</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Exercise name</span>
-                        <span>25 kg x 12</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Exercise name</span>
-                        <span>25 kg x 12</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Exercise name</span>
-                        <span>25 kg x 12</span>
-                    </div>
+                    {exerciseEvents.sort((a,b) => a.orderNumber - b.orderNumber).map((exerciseEvent) => {
+                        if (!exerciseEvent.exerciseType || !exerciseEvent.trainingsSets) return null;
+                        return (
+                            <div key={exerciseEvent.id} className="flex justify-between">
+                                <span>{exerciseEvent.exerciseType?.name}</span>
+                                <span>{getAverageSet([exerciseEvent])}</span>
+                            </div>
+                        );
+                     })}
                 </div>
             </div>
         </div>
