@@ -20,7 +20,7 @@ export default function ExerciseEventComponent(props: { exerciseEvent: ExerciseE
                 <div className="flex flex-row justify-between">
                     <span>Nr.</span> <span>Weight x Reps</span>
                 </div>
-                {sets.map((set, index) => {
+                {sets.sort((a,b) => a.orderNumber - b.orderNumber).map((set, index) => {
                     return (
                         <div key={index} className="flex flex-row justify-between text-stone-600 font-normal">
                             <span>{set.orderNumber}.</span><span>{set.weight} kg x {set.reps}</span>
