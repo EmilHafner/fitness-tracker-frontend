@@ -1,19 +1,10 @@
-import { addEmptyExerciseEventToTraining, axiosI, stopTraining } from "@/services/axiosInstance";
+import { addEmptyExerciseEventToTraining, stopTraining } from "@/services/axiosInstance";
 import { AddIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
 import { Skeleton, useToast } from "@chakra-ui/react";
-import {
-    differenceInMilliseconds,
-    differenceInMinutes,
-    differenceInSeconds,
-    format,
-    formatDistanceToNow,
-    formatDistanceToNowStrict,
-    getMilliseconds,
-    roundToNearestMinutes,
-} from "date-fns";
+import { differenceInSeconds, format } from "date-fns";
 import { useRouter } from "next/router";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { getExercisesByTrainingId, getTrainingById } from "@/services/axiosInstance";
+import { getTrainingById } from "@/services/axiosInstance";
 import { errorToast } from "@/utils/standardToasts";
 import Button from "@/components/basics/Button";
 import ExerciseEventComponent from "@/components/training/exercise/ExerciseEventComponent";
@@ -47,9 +38,8 @@ export default function Training() {
     const toast = useToast();
     const [loadNewExercise, setLoadNewExercise] = useState(false);
     const [trainingActive, setTrainingActive] = useState(false);
-    const { exerciseEvents, addExerciseEvent, updateExerciseEvents, exerciseEventsLoading } = useExerciseEvents(
-        parseInt(router.query.id as string)
-    );
+    const { exerciseEvents } = useExerciseEvents(parseInt(router.query.id as string));
+    const [stopping, setStopping] = useState(false);
 
     const loadTrainings = useCallback(() => {
         getTrainingById(parseInt(router.query.id as string))
@@ -72,21 +62,6 @@ export default function Training() {
         loadTrainings();
     }, [router, toast, loadTrainings]);
 
-    // Add or update an exercise to the training
-    const addOrUpdateExerciseInTraining = (exerciseEvent?: ExerciseEvent) => {
-        // If exercise is undefined, create a new empty exercise
-
-        //axiosI.post(`/training/${router.query.id}/exercise/add`, exercise);
-
-        // For now just wait 1 second and set loadNewExercise to true then false
-        // Just for implementing the skeleton loading
-        setLoadNewExercise(true);
-        console.log(JSON.stringify(training));
-        setTimeout(() => {
-            setLoadNewExercise(false);
-        }, 2000);
-    };
-
     const addEmptyExerciseEvent = () => {
         setLoadNewExercise(true);
         addEmptyExerciseEventToTraining(training.id)
@@ -100,8 +75,14 @@ export default function Training() {
     };
 
     const stopThisTraining = () => {
-        stopTraining(training.id);
-        loadTrainings();
+        setStopping(true);
+        stopTraining(training.id).then(() => {
+            loadTrainings();
+        }).catch((err) => {
+            toast(errorToast("An Error occured", err.message));
+        }).finally(() => {
+            setStopping(false);
+        })
     };
 
     return (
@@ -127,7 +108,7 @@ export default function Training() {
                             </div>
                         </Button>
 
-                        <Button variant="big" onClick={stopThisTraining}>
+                        <Button variant="big" onClick={stopThisTraining} isLoading={stopping}>
                             <div className="flex items-center justify-center gap-2">
                                 <CheckCircleIcon height={6} width={6} />
                                 Stop training
