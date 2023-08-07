@@ -3,17 +3,19 @@ import { getAllTrainings } from "@/services/axiosInstance";
 import TrainingItem, {
   TrainingItemInterface,
 } from "@/components/training/TrainingItem";
-import { useToast, Skeleton, SkeletonText } from "@chakra-ui/react";
-import { getSession, signIn, useSession } from "next-auth/react";
+import { useToast, Skeleton } from "@chakra-ui/react";
+import { getSession } from "next-auth/react";
 import AddTrainingComponent from "@/components/training/AddTrainingComponent";
-import { compareAsc, compareDesc } from "date-fns";
+import { compareDesc } from "date-fns";
 import { GetServerSideProps } from "next";
+import { ExerciseEvent } from "./[id]";
 
 interface TrainingInterface {
   id: number;
   userId: number;
   startDateTime: Date;
   endDateTime: Date;
+  exerciseEvents: ExerciseEvent[];
 }
 
 export default function Trainings() {
@@ -21,20 +23,6 @@ export default function Trainings() {
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
   const [isTrainingRunning, setIsTrainingRunning] = useState(true);
-  const { data: session } = useSession({
-    required: true,
-    onUnauthenticated() {
-      toast({
-        title: "Cannot access this page",
-        description: "You have to login first.",
-        status: "error",
-        variant: "left-accent",
-        duration: 4000,
-        isClosable: true,
-      });
-      signIn();
-    },
-  });
 
   const loadItems = useCallback((): void => {
     setIsLoading(true);
@@ -66,9 +54,8 @@ export default function Trainings() {
   }, [toast]);
 
   useEffect(() => {
-    if (!session) return;
-    loadItems();
-  }, [toast, session, loadItems]);
+    loadItems()
+  }, [toast, loadItems]);
 
   if (isLoading) {
     return (
