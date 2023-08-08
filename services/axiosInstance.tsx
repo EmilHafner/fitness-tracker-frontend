@@ -107,3 +107,15 @@ export async function updateSet({
 export function deleteTrainingsSet(setId: number) {
     return axiosI.delete(`/trainingsSets/${setId}`);
 }
+
+export function getAllExerciseTypes() {
+    return axiosI.get("/exerciseTypes/all");
+}
+
+export function saveExerciseType(exerciseType: ExerciseType) {
+    return axiosI.post("/exerciseTypes/add", exerciseType);
+}
+
+export function deleteExerciseType(exerciseTypeId: number) {
+    return axiosI.delete("/exerciseTypes/delete/" + exerciseTypeId);
+}
