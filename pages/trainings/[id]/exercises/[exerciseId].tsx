@@ -12,6 +12,7 @@ import TrainingsSetComponent from "@/components/training/exercise/TrainingsSetCo
 import { AddIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import SelectExerciseType from "@/components/training/exercise/SelectExerciseType";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Set } from "global-types";
 
 export default function Exercise() {
     const router = useRouter();
@@ -87,7 +88,7 @@ export default function Exercise() {
                 </div>
                 {loadSetsQuery.isSuccess && (
                     <div className="flex flex-col gap-4">
-                        {loadSetsQuery.data?.data.map((set) => {
+                        {loadSetsQuery.data?.data.map((set: Set) => {
                             return <TrainingsSetComponent key={set.id} set={set} />;
                         })}
                     </div>
