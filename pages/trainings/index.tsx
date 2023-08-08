@@ -55,16 +55,6 @@ export default function Trainings() {
 
     if (getAllTrainingsQuery.isLoading) {
         return <LoadingPage />;
-
-        return (
-            <div className="flex min-h-screen flex-col items-center gap-4 pt-4">
-                {[...Array(5)].map((key) => (
-                    <div key={key} className="h-32 w-5/6 rounded-xl">
-                        <Skeleton height="100%" width="100%" />
-                    </div>
-                ))}
-            </div>
-        );
     }
 
     return (
@@ -74,9 +64,9 @@ export default function Trainings() {
                     <motion.div
                         className="flex w-full justify-center"
                         key={training.id}
-                        initial={{ opacity: 0, x: "-80vw" }}
-                        animate={{ opacity: 1, x: "0" }}
-                        transition={{ delay: 0.1 * i, duration: 0.9 }}
+                        animate={{opacity: [0, 1], x: ["-80vw", "0vw"]}}
+                        
+                        transition={{ delay: 0.08 * i, duration: 1, ease: "easeInOut" }}
                     >
                         <TrainingItem {...training} />
                     </motion.div>
