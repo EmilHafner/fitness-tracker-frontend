@@ -1,11 +1,8 @@
-import { addSetToExerciseEvent, getExerciseEventById, getSetsByExerciseId } from "@/services/axiosInstance";
+import { addSetToExerciseEvent, getSetsByExerciseId } from "@/services/axiosInstance";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import React from "react";
 import { getSession } from "next-auth/react";
 import { GetServerSideProps } from "next";
-import { ExerciseEvent } from "..";
-import { useSets } from "@/hooks/useSets";
 import Button from "@/components/basics/Button";
 import LoadingPage from "@/components/loading/LoadingPage";
 import TrainingsSetComponent from "@/components/training/exercise/TrainingsSetComponent";
@@ -16,10 +13,7 @@ import { Set } from "global-types";
 
 export default function Exercise() {
     const router = useRouter();
-    const [exerciseEvent, setExerciseEvent] = useState<ExerciseEvent>({} as ExerciseEvent);
     //const { sets, addSet, saveSets, changeSetLocally } = useSets(parseInt(router.query?.exerciseId as string));
-    const [exerciseEventLoading, setExerciseEventLoading] = useState<boolean>(true);
-    const [loadingError, setLoadingError] = useState<boolean>(false);
 
     const queryClient = useQueryClient();
 
@@ -36,22 +30,9 @@ export default function Exercise() {
         },
     });
 
-    useEffect(() => {
-        setExerciseEventLoading(true);
-        getExerciseEventById(parseInt(router.query?.exerciseId as string))
-            .then((res) => {
-                setExerciseEvent(res.data);
-                if (!res.data) {
-                    setLoadingError(true);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            })
-            .finally(() => {
-                setExerciseEventLoading(false);
-            });
-    }, [router]);
+    const sortSets = (sets: Set[]) => {
+        return sets.sort((a, b) => a.orderNumber - b.orderNumber);
+    };
 
     const onComplete = () => {
         // Update all sets before changing location
@@ -59,12 +40,12 @@ export default function Exercise() {
     };
 
     // Loading animation while fetching data
-    if (exerciseEventLoading) {
+    if (loadSetsQuery.isLoading) {
         return <LoadingPage />;
     }
 
     // If the exercise is not found, show an error
-    if (loadingError) {
+    if (loadSetsQuery.isError) {
         router.push("/404");
         return <div>Exercise not found</div>;
     }
@@ -75,7 +56,7 @@ export default function Exercise() {
                 <div className="flex w-full flex-row items-center justify-between">
                     <div className="relative z-10 w-3/5 max-w-md py-4">
                         <SelectExerciseType
-                            initialType={exerciseEvent.exerciseType?.name}
+                            initialType={loadSetsQuery.data?.data.exerciseType?.name}
                             exerciseId={router.query?.exerciseId as string}
                         />
                     </div>
@@ -88,7 +69,7 @@ export default function Exercise() {
                 </div>
                 {loadSetsQuery.isSuccess && (
                     <div className="flex flex-col gap-4">
-                        {loadSetsQuery.data?.data.map((set: Set) => {
+                        {sortSets(loadSetsQuery.data?.data).map((set: Set) => {
                             return <TrainingsSetComponent key={set.id} set={set} />;
                         })}
                     </div>
