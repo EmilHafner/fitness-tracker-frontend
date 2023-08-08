@@ -63,27 +63,47 @@ export async function searchExerciseTypesByName(name: string | undefined): Promi
 }
 
 export async function setExerciseTypeOnExercise(exerciseId: number, exerciseTypeId: number) {
-    return await axiosI.put(`/exerciseEvents/${exerciseId}/exerciseType/${exerciseTypeId}`)
+    return await axiosI.put(`/exerciseEvents/${exerciseId}/exerciseType/${exerciseTypeId}`);
 }
 
 export async function getExerciseEventById(exerciseEventId: number): Promise<AxiosResponse<ExerciseEvent, any>> {
     return await axiosI.get(`/exerciseEvents/${exerciseEventId}`);
 }
 
-export async function getSetsByExerciseId(exerciseId: number): Promise<AxiosResponse<any, any>> {
+export async function getSetsByExerciseId(exerciseId: any) {
     return await axiosI.get(`/exerciseEvents/${exerciseId}/sets`);
 }
 
-export async function addSetToExerciseEvent(exerciseEventId: number, weight: number, reps: number) {
+export async function addSetToExerciseEvent({
+    exerciseEventId,
+    weight,
+    reps,
+}: {
+    exerciseEventId: any;
+    weight: number;
+    reps: number;
+}) {
     return await axiosI.post(`/exerciseEvents/${exerciseEventId}/sets`, {
         weight,
         reps,
     });
 }
 
-export async function updateSet(setId: number, weight: number, reps: number) {
+export async function updateSet({
+    setId,
+    weight,
+    reps,
+}: {
+    setId: number;
+    weight: string | number;
+    reps: string | number;
+}) {
     return await axiosI.put(`/trainingsSets/${setId}`, {
         weight,
         reps,
     });
+}
+
+export function deleteTrainingsSet(setId: number) {
+    return axiosI.delete(`/trainingsSets/${setId}`);
 }

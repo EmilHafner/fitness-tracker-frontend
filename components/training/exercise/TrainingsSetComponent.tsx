@@ -1,12 +1,46 @@
 import Button from "@/components/basics/Button";
+import { useDebounce } from "@/hooks/useDebounce";
+import { deleteTrainingsSet, updateSet } from "@/services/axiosInstance";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { Checkbox, Input, InputGroup } from "@chakra-ui/react";
+import {
+    Checkbox,
+    Input,
+    InputGroup,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+} from "@chakra-ui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Set } from "global-types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-export default function TrainingsSetComponent(props: { set: Set; changeSetLocally: (set: Set) => void }) {
+export default function TrainingsSetComponent(props: { set: Set }) {
     const [set, setSet] = useState<Set>(props.set);
-    const { changeSetLocally } = props;
+    const queryClient = useQueryClient();
+    const deleteTrainingsSetMutation = useMutation({
+        mutationFn: deleteTrainingsSet,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["sets"] });
+        },
+    });
+    const { debouncedValue: debouncedSet } = useDebounce(set, 700);
+
+    const updateTrainingsSetMutation = useMutation({
+        mutationFn: updateSet,
+        onError: () => {
+            queryClient.invalidateQueries({ queryKey: ["sets"] });
+        },
+    });
+
+    useEffect(() => {
+        updateTrainingsSetMutation.mutate({
+            setId: debouncedSet.id,
+            weight: debouncedSet.weight,
+            reps: debouncedSet.reps,
+        });
+    }, [debouncedSet]);
 
     return (
         <div className="card border-2 bg-stone-50">
@@ -19,7 +53,10 @@ export default function TrainingsSetComponent(props: { set: Set; changeSetLocall
                                 <span className={"font-medium"}>Warm up</span>
                             </div>
                         </div>
-                        <Button className="border bg-stone-50 p-2 shadow-none hover:bg-abort hover:bg-opacity-50">
+                        <Button
+                            className="border bg-stone-50 p-2 shadow-none hover:bg-abort hover:bg-opacity-50"
+                            onClick={() => deleteTrainingsSetMutation.mutate(set.id)}
+                        >
                             <div className="flex items-center justify-center rounded-sm ">
                                 <DeleteIcon />
                             </div>
@@ -29,32 +66,35 @@ export default function TrainingsSetComponent(props: { set: Set; changeSetLocall
                     <div className="flex w-full flex-row items-center gap-6">
                         <div>
                             <span className="font-medium text-stone-800">Weight</span>
-                            <InputGroup>
-                                <Input
-                                    type="number"
-                                    value={set.weight}
-                                    onChange={(e) => {
-                                        let weight = e.target.value ? parseInt(e.target.value) : "";
-                                        setSet({ ...set, weight: weight });
-                                        changeSetLocally({ ...set, weight: weight });
-                                    }}
-                                />
-                            </InputGroup>
+                            <NumberInput
+                                value={set.weight}
+                                onChange={(value) => {
+                                    let weight = value ? parseInt(value) : "";
+                                    setSet({ ...set, weight: weight });
+                                }}
+                            >
+                                <NumberInputField />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
                         </div>
                         <div>
                             <span className="font-medium text-stone-800">Reps</span>
-                            <InputGroup>
-                                Reps
-                                <Input
-                                    type="number"
-                                    value={set.reps}
-                                    onChange={(e) => {
-                                        let reps = e.target.value ? parseInt(e.target.value) : "";
-                                        setSet({ ...set, reps: reps });
-                                        changeSetLocally({ ...set, reps: reps });
-                                    }}
-                                />
-                            </InputGroup>
+                            <NumberInput
+                                value={set.reps}
+                                onChange={(value) => {
+                                    let reps = value ? parseInt(value) : "";
+                                    setSet({ ...set, reps: reps });
+                                }}
+                            >
+                                <NumberInputField />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
                         </div>
                     </div>
                 </div>
