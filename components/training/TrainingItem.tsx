@@ -12,7 +12,7 @@ export interface TrainingItemInterface {
     exerciseEvents: ExerciseEvent[];
 }
 
-export default function TrainingItem(props: TrainingItemInterface & { reloadItems: () => void }) {
+export default function TrainingItem(props: TrainingItemInterface) {
     const router = useRouter();
     const [loading, setLoading] = useBoolean();
 
@@ -31,7 +31,7 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
         if (!exerciseEvents) return;
         let sorted = exerciseEvents.sort((a, b) => a.orderNumber - b.orderNumber);
         setSortedExerciseEvents(sorted);
-    }, [exerciseEvents])
+    }, [exerciseEvents]);
 
     const getStartDateString = (): string => {
         return format(start, "MMMM do");
@@ -91,7 +91,7 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
         <div
             onClick={onClick}
             className={
-                "flex h-full w-5/6 bg-stone-50 rounded-xl border-2 px-8 py-4 shadow-sm hover:cursor-pointer hover:border-accent hover:shadow-lg md:px-16"
+                "flex h-full w-5/6 rounded-xl border-2 bg-stone-50 px-8 py-4 shadow-sm hover:cursor-pointer hover:border-accent hover:shadow-lg md:px-16"
             }
         >
             <div className={"mr-2 w-2 rounded-md " + (active ? "bg-primary" : "bg-accent")}></div>
@@ -113,20 +113,22 @@ export default function TrainingItem(props: TrainingItemInterface & { reloadItem
                     </div>
                 </div>
                 <div className="py-2">{/* Divider */}</div>
-                <div className="flex w-4/5 sm:w-52 flex-col text-xs text-stone-600 md:w-56 md:text-sm">
+                <div className="flex w-4/5 flex-col text-xs text-stone-600 sm:w-52 md:w-56 md:text-sm">
                     <div className="flex justify-between font-bold">
                         <span>Exercise</span>
                         <span>Avg. Set</span>
                     </div>
-                    {exerciseEvents.sort((a,b) => a.orderNumber - b.orderNumber).map((exerciseEvent) => {
-                        if (!exerciseEvent.exerciseType || !exerciseEvent.trainingsSets) return null;
-                        return (
-                            <div key={exerciseEvent.id} className="flex justify-between">
-                                <span>{exerciseEvent.exerciseType?.name}</span>
-                                <span>{getAverageSet([exerciseEvent])}</span>
-                            </div>
-                        );
-                     })}
+                    {exerciseEvents
+                        .sort((a, b) => a.orderNumber - b.orderNumber)
+                        .map((exerciseEvent) => {
+                            if (!exerciseEvent.exerciseType || !exerciseEvent.trainingsSets) return null;
+                            return (
+                                <div key={exerciseEvent.id} className="flex justify-between">
+                                    <span>{exerciseEvent.exerciseType?.name}</span>
+                                    <span>{getAverageSet([exerciseEvent])}</span>
+                                </div>
+                            );
+                        })}
                 </div>
             </div>
         </div>
