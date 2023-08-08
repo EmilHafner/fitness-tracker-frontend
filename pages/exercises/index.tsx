@@ -12,11 +12,22 @@ import {
     Input,
     Select,
     InputGroup,
+    useToast,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { useEffect, useState } from "react";
-import { axiosI } from "@/services/axiosInstance";
+import {
+    axiosI,
+    deleteExerciseType,
+    getAllExerciseTypes,
+    saveExerciseType,
+    searchExerciseTypesByName,
+} from "@/services/axiosInstance";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingPage from "@/components/loading/LoadingPage";
+import { errorToast } from "@/utils/standardToasts";
+import { ExerciseType } from "global-types";
 
 interface Exercise {
     id?: number;
@@ -29,10 +40,42 @@ export default function Exercises() {
     const [bodyParts, setBodyParts] = useState([]);
     const [exercises, setExercises] = useState([] as Exercise[]);
     const [exerciseToSave, setExerciseToSave] = useState({} as Exercise);
-    const [submitting, setSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [deletingId, setDeletingId] = useState(-1);
+    const toast = useToast();
+
+    const queryClient = useQueryClient();
+
+    const loadAllExerciseTypesQuery = useQuery({
+        queryKey: ["exercises"],
+        queryFn: getAllExerciseTypes,
+    });
+
+    const searchExerciseTypesByNameQuery = useQuery({
+        queryKey: ["searchExercises"],
+        queryFn: () => searchExerciseTypesByName,
+    });
+
+    const saveExerciseTypeMutation = useMutation({
+        mutationFn: saveExerciseType,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["exercises"] });
+            onModalClose();
+            setExerciseToSave({} as { name: string; bodypart: string });
+        },
+        onError: () => {
+            toast(errorToast("Error", "Could not save Exercise Type"));
+        },
+    });
+
+    const deleteExerciseTypeMutation = useMutation({
+        mutationFn: deleteExerciseType,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["exercises"] }),
+    });
+
+    const sortExerciseTypes = (exerciseTypes: ExerciseType[]) => {
+        return exerciseTypes.sort((a, b) => a.name.localeCompare(b.name));
+    };
 
     useEffect(() => {
         setIsLoading(true);
@@ -59,40 +102,6 @@ export default function Exercises() {
             })
             .finally(() => {
                 setIsLoading(false);
-                setDeletingId(-1);
-            });
-    };
-
-    const saveExercise = () => {
-        setSubmitting(true);
-        console.log(exerciseToSave);
-        axiosI
-            .post("/exerciseTypes/add", exerciseToSave)
-            .then((res) => {
-                console.log(res);
-                loadExercises();
-                onModalClose();
-                setExerciseToSave({} as { name: string; bodypart: string });
-            })
-            .catch((err) => {
-                console.error(err);
-            })
-            .finally(() => {
-                setSubmitting(false);
-            });
-    };
-
-    const deleteExerise = (id: number) => {
-        setDeletingId(id);
-        axiosI
-            .delete("/exerciseTypes/delete/" + id)
-            .then((res) => {
-                console.log(res);
-                loadExercises();
-            })
-            .catch((err) => {
-                console.error(err);
-                setDeletingId(-1);
             });
     };
 
@@ -102,60 +111,50 @@ export default function Exercises() {
         onModalClose();
     };
 
+    // LoadingPage
+    if (loadAllExerciseTypesQuery.isLoading) return <LoadingPage />;
+
     return (
         <div>
             <div className="flex w-full justify-center">
                 <div className="flex w-5/6 flex-col gap-2 py-4">
                     {/* List of all exercises */}
-                    {!isLoading &&
-                        exercises.map((v: any) => {
-                            return (
-                                <div
-                                    key={v.id}
-                                    className="mb-2 flex flex-row items-center justify-between rounded-xl bg-slate-200 px-4 py-2 shadow-xl"
-                                >
-                                    <div className="flex flex-col gap-2">
-                                        <h1 className="font-medium">{v.name}</h1>
-                                        <p className="text-sm text-gray-500">{v.bodypart}</p>
-                                    </div>
-                                    <div className="flex flex-row gap-4">
-                                        <Button
-                                            variant="normal"
-                                            onClick={() => {
-                                                setIsEditing(true);
-                                                setExerciseToSave(v);
-                                                onModalOpen();
-                                            }}
-                                        >
-                                            <div className="flex items-center justify-center p-1">
-                                                <EditIcon />
-                                            </div>
-                                        </Button>
-                                        <Button
-                                            variant="normal"
-                                            className="bg-abort hover:bg-abort-muted"
-                                            onClick={() => deleteExerise(v.id)}
-                                            isLoading={deletingId == v.id}
-                                        >
-                                            <div className="flex items-center justify-center p-1">
-                                                <DeleteIcon />
-                                            </div>
-                                        </Button>
-                                    </div>
+                    {sortExerciseTypes(loadAllExerciseTypesQuery.data?.data).map((v: any) => {
+                        return (
+                            <div
+                                key={v.id}
+                                className="mb-2 flex flex-row items-center justify-between rounded-xl bg-slate-200 px-4 py-2 shadow-xl"
+                            >
+                                <div className="flex flex-col gap-2">
+                                    <h1 className="font-medium">{v.name}</h1>
+                                    <p className="text-sm text-gray-500">{v.bodypart}</p>
                                 </div>
-                            );
-                        })}
-
-                    {/* While exercises are loading */}
-                    {isLoading && (
-                        <div className="flex min-h-screen flex-col items-center gap-4">
-                            {[...Array(10)].map((key) => (
-                                <div key={key} className="h-16 w-full rounded-xl">
-                                    <div className="h-full w-full animate-pulse rounded-xl bg-slate-200"></div>
+                                <div className="flex flex-row gap-4">
+                                    <Button
+                                        variant="normal"
+                                        onClick={() => {
+                                            setIsEditing(true);
+                                            setExerciseToSave(v);
+                                            onModalOpen();
+                                        }}
+                                    >
+                                        <div className="flex items-center justify-center p-1">
+                                            <EditIcon />
+                                        </div>
+                                    </Button>
+                                    <Button
+                                        variant="normal"
+                                        className="bg-abort hover:bg-abort-muted"
+                                        onClick={() => deleteExerciseTypeMutation.mutate(v.id)}
+                                    >
+                                        <div className="flex items-center justify-center p-1">
+                                            <DeleteIcon />
+                                        </div>
+                                    </Button>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -216,7 +215,11 @@ export default function Exercises() {
                                 <Button className="bg-slate-200 hover:bg-slate-300" onClick={cancelEdit}>
                                     Cancel
                                 </Button>
-                                <Button isLoading={submitting} disabled={submitting} onClick={saveExercise}>
+                                <Button
+                                    isLoading={saveExerciseTypeMutation.isLoading}
+                                    disabled={saveExerciseTypeMutation.isLoading}
+                                    onClick={() => saveExerciseTypeMutation.mutate(exerciseToSave)}
+                                >
                                     {isEditing ? "Save" : "Create"}
                                 </Button>
                             </div>
