@@ -4,8 +4,6 @@ import { deleteTrainingsSet, updateSet } from "@/services/axiosInstance";
 import { DeleteIcon } from "@chakra-ui/icons";
 import {
     Checkbox,
-    Input,
-    InputGroup,
     NumberDecrementStepper,
     NumberIncrementStepper,
     NumberInput,
@@ -14,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Set } from "global-types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function TrainingsSetComponent(props: { set: Set }) {
     const [set, setSet] = useState<Set>(props.set);
@@ -26,7 +24,9 @@ export default function TrainingsSetComponent(props: { set: Set }) {
         },
     });
     const { debouncedValue: debouncedSet } = useDebounce(set, 700);
+    
 
+    
     const updateTrainingsSetMutation = useMutation({
         mutationFn: updateSet,
         onError: () => {
@@ -34,13 +34,18 @@ export default function TrainingsSetComponent(props: { set: Set }) {
         },
     });
 
+    // This is needed in order for the useEffect to work. Otherwise we would get an infinite loop
+    const {mutate: mutateTrainingsSets} = updateTrainingsSetMutation;
+
     useEffect(() => {
-        updateTrainingsSetMutation.mutate({
+        mutateTrainingsSets({
             setId: debouncedSet.id,
             weight: debouncedSet.weight,
             reps: debouncedSet.reps,
-        });
-    }, [debouncedSet]);
+        })
+    }, [debouncedSet, mutateTrainingsSets]);
+
+
 
     return (
         <div className="card border-2 bg-stone-50">
