@@ -15,10 +15,10 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-    axiosI,
     deleteExerciseType,
+    getAllBodyparts,
     getAllExerciseTypes,
     saveExerciseType,
     searchExerciseTypesByName,
@@ -37,14 +37,16 @@ interface Exercise {
 
 export default function Exercises() {
     const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
-    const [bodyParts, setBodyParts] = useState([]);
-    const [exercises, setExercises] = useState([] as Exercise[]);
     const [exerciseToSave, setExerciseToSave] = useState({} as Exercise);
-    const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const toast = useToast();
 
     const queryClient = useQueryClient();
+
+    const loadAllBodypartsQuery = useQuery({
+        queryKey: ["bodyparts"],
+        queryFn: () => getAllBodyparts(),
+    });
 
     const loadAllExerciseTypesQuery = useQuery({
         queryKey: ["exercises"],
@@ -77,34 +79,6 @@ export default function Exercises() {
         return exerciseTypes.sort((a, b) => a.name.localeCompare(b.name));
     };
 
-    useEffect(() => {
-        setIsLoading(true);
-        axiosI
-            .get("/exerciseTypes/bodyparts")
-            .then((res) => {
-                setBodyParts(res.data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-        console.log("Loading exercises");
-        loadExercises();
-    }, []);
-
-    const loadExercises = () => {
-        axiosI
-            .get("/exerciseTypes/all")
-            .then((res: { data: Exercise[] }) => {
-                setExercises(res.data.sort((a: Exercise, b: Exercise) => a.name.localeCompare(b.name)));
-            })
-            .catch((err) => {
-                console.error(err);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    };
-
     const cancelEdit = () => {
         setIsEditing(false);
         setExerciseToSave({} as { name: string; bodypart: string });
@@ -123,7 +97,7 @@ export default function Exercises() {
                         return (
                             <div
                                 key={v.id}
-                                className="mb-2 flex flex-row items-center justify-between rounded-xl bg-slate-200 px-4 py-2 shadow-xl"
+                                className="mb-2 flex flex-row items-center justify-between rounded-xl border bg-stone-100 px-8 py-4 hover:border-accent"
                             >
                                 <div className="flex flex-col gap-2">
                                     <h1 className="font-medium">{v.name}</h1>
@@ -146,6 +120,7 @@ export default function Exercises() {
                                         variant="normal"
                                         className="bg-abort hover:bg-abort-muted"
                                         onClick={() => deleteExerciseTypeMutation.mutate(v.id)}
+                                        isLoading={deleteExerciseTypeMutation.variables === v.id}
                                     >
                                         <div className="flex items-center justify-center p-1">
                                             <DeleteIcon />
@@ -198,9 +173,9 @@ export default function Exercises() {
                                         }
                                     >
                                         <option value="Null">Not selected</option>
-                                        {bodyParts.map((v: any, i) => {
+                                        {loadAllBodypartsQuery.data?.data.map((v: any) => {
                                             return (
-                                                <option key={i} value={v}>
+                                                <option key={v} value={v}>
                                                     {v}
                                                 </option>
                                             );
