@@ -119,3 +119,7 @@ export function saveExerciseType(exerciseType: ExerciseType) {
 export function deleteExerciseType(exerciseTypeId: number) {
     return axiosI.delete("/exerciseTypes/delete/" + exerciseTypeId);
 }
+
+export function getAllBodyparts(): Promise<AxiosResponse<string[], any>> {
+    return axiosI.get("/exerciseTypes/bodyparts");
+}
