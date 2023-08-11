@@ -41,7 +41,7 @@ export default function SelectExerciseType({ initialType, exerciseId }: { initia
     return (
         <div ref={ref} className="relative w-full">
             <InputGroup onClick={onOpen}>
-                <Input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <Input placeholder="Select Exercise Type" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 <InputRightElement>
                     <ChevronDownIcon width={6} height={6} />
                 </InputRightElement>
