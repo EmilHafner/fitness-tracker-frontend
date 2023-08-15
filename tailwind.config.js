@@ -23,7 +23,7 @@ module.exports = {
                 "accent-muted": "#bda888",
                 "accent-light": "#d1e8e2",
                 abort: "#f1634f",
-                "abort-muted": "#e14135",
+                "abort-muted": "#c14125",
             },
             animation: {
                 "spin-slow": "spin 1.5s linear infinite",

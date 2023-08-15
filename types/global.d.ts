@@ -18,4 +18,11 @@ declare module "global-types" {
         dropdownItems?: ItemInterface[];
         className?: string;
     }
+
+    interface Plan {
+        id: number;
+        name: string;
+        description: string;
+        exercises: ExerciseType[];
+    }
 }
