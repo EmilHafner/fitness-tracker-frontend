@@ -15,12 +15,20 @@ export default function Button(props: ButtonProps) {
         sizeClasses = "px-6 py-4 ";
     }
 
+    // --- Old styling ---
+    // className={twMerge(
+    //     twJoin(sizeClasses, (disabled && "cursor-not-allowed opacity-50 "),
+    //         " relative flex items-center justify-center rounded-xl bg-accent font-medium shadow-xl hover:bg-accent-muted"),
+    //     className
+    // )}
+
+
     return (
         <button
             {...rest}
             className={twMerge(
                 twJoin(sizeClasses, (disabled && "cursor-not-allowed opacity-50 "),
-                    " relative flex items-center justify-center rounded-xl bg-accent font-medium shadow-xl hover:bg-accent-muted"),
+                    " relative flex items-center justify-center rounded-xl bg-stone-100 border-2 border-stone-400 font-medium hover:border-accent shadow-md"),
                 className
             )}
         >
